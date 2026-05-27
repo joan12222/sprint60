@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>作文冲刺60</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
+    .card-enter { animation: fadeUp .3s ease both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    textarea { resize: vertical; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- 顶部导航（两行） -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <!-- 第一行：Logo + 主模块 -->
+    <div class="max-w-4xl mx-auto px-4 pt-3 pb-2 flex items-center gap-3">
+      <span class="text-xl font-bold text-emerald-600 shrink-0">作文冲刺60</span>
+      <nav id="top-nav" class="flex gap-1 text-sm overflow-x-auto"></nav>
+    </div>
+    <!-- 第二行：个人素材库 + 21天计划（固定）+ 子标签（动态） -->
+    <div class="max-w-4xl mx-auto px-4 pb-2 flex items-center gap-1 text-sm border-t border-gray-100 overflow-x-auto">
+      <button id="nav-personal" onclick="showSection('personal')"
+        class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors">个人素材库</button>
+      <button id="nav-plan" onclick="showSection('plan')"
+        class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors">21天计划</button>
+      <div id="sub-nav-sep" class="hidden w-px h-4 bg-gray-200 mx-1 shrink-0"></div>
+      <div id="sub-nav" class="flex gap-1"></div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-6">
+
+    <!-- 优秀作文 → 导入 -->
+    <section id="content-essays-import" class="hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5">
+        <h2 class="text-base font-semibold text-gray-800 mb-1">导入优秀素材作文</h2>
+        <p class="text-sm text-gray-400 mb-4">粘贴 JSON，支持单个对象或数组，字段：type / title / content / comment（可选）</p>
+
+        <!-- JSON 格式提示 -->
+        <div class="bg-gray-50 rounded-xl p-3 mb-4 text-xs text-gray-400 font-mono leading-5">
+          <div class="text-gray-500 font-sans font-medium mb-1 text-xs">JSON 格式参考</div>
+          <span class="text-blue-400">[</span> <span class="text-gray-400">// 单篇去掉 [ ]</span><br>
+          &nbsp;&nbsp;<span class="text-blue-400">&#123;</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-emerald-500">"type"</span>: <span class="text-amber-500">"亲情"</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-emerald-500">"title"</span>: <span class="text-amber-500">"爷爷的书法"</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-emerald-500">"content"</span>: <span class="text-amber-500">"文章正文..."</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-emerald-500">"comment"</span>: <span class="text-amber-500">"点评内容..."</span> <span class="text-gray-300">// 可选</span><br>
+          &nbsp;&nbsp;<span class="text-blue-400">&#125;</span><br>
+          <span class="text-blue-400">]</span>
+        </div>
+
+        <!-- 粘贴区 -->
+        <textarea id="json-input"
+          class="w-full h-48 text-sm font-mono border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white text-gray-700 placeholder-gray-300"
+          placeholder='粘贴 JSON 到这里...'></textarea>
+
+        <!-- 错误提示 -->
+        <div id="json-error" class="hidden mt-2 text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2"></div>
+
+        <!-- 操作按钮 -->
+        <div class="flex gap-3 mt-4">
+          <button onclick="importJSON()"
+            class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold py-2.5 rounded-xl transition-colors text-sm">
+            导入素材
+          </button>
+          <button onclick="clearInput()"
+            class="px-5 bg-gray-100 hover:bg-gray-200 text-gray-500 font-medium py-2.5 rounded-xl transition-colors text-sm">
+            清空
+          </button>
+        </div>
+      </div>
+
+      <!-- 导入结果预览 -->
+      <div id="preview-area" class="hidden">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-gray-600">本次导入预览</h3>
+          <span id="preview-count" class="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full"></span>
+        </div>
+        <div id="preview-list" class="space-y-3"></div>
+        <button onclick="confirmImport()"
+          class="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition-colors text-sm">
+          确认入库 →
+        </button>
+      </div>
+    </section>
+
+    <!-- 个人素材库 → 素材积累 -->
+    <section id="content-personal-accumulate" class="hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-semibold text-gray-800">素材积累</h2>
+          <button onclick="toggleApiSettings()" id="api-key-status-btn"
+            class="text-xs text-gray-400 hover:text-gray-600">⚙ API Key</button>
+        </div>
+
+        <!-- API Key 设置面板 -->
+        <div id="api-settings-panel" class="hidden mb-4 p-4 bg-gray-50 rounded-xl">
+          <label class="text-xs font-medium text-gray-600 mb-1.5 block">DeepSeek API Key</label>
+          <div class="flex gap-2">
+            <input id="api-key-input" type="password"
+              class="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
+              placeholder="sk-..." />
+            <button onclick="saveApiKey()"
+              class="text-sm bg-emerald-600 text-white px-4 py-1.5 rounded-lg hover:bg-emerald-700 font-medium">保存</button>
+          </div>
+          <p class="text-xs text-gray-400 mt-1.5">Key 仅存于本地浏览器，不会外传</p>
+        </div>
+
+        <!-- 类型选择 -->
+        <div id="category-btns" class="flex flex-wrap gap-2 mb-4"></div>
+
+        <!-- 对话窗口 -->
+        <div id="chat-messages"
+          class="h-72 overflow-y-auto space-y-3 mb-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+          <div class="text-center text-xs text-gray-300 py-10">选择上方素材类型，开始与 AI 对话积累素材</div>
+        </div>
+
+        <!-- 输入区 -->
+        <div class="flex gap-2 mb-4">
+          <textarea id="chat-input" rows="2" disabled
+            class="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 placeholder-gray-300 resize-none disabled:bg-gray-50"
+            placeholder="输入你的回复…（Enter 发送，Shift+Enter 换行）"></textarea>
+          <button onclick="sendChatMessage()" id="btn-send" disabled
+            class="bg-emerald-600 text-white px-4 rounded-xl text-sm font-medium transition-colors hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed">
+            发送
+          </button>
+        </div>
+
+        <!-- 素材卡预览 -->
+        <div id="material-card-panel" class="hidden border border-emerald-100 bg-emerald-50 rounded-xl p-4 mb-4 text-xs">
+          <div class="font-semibold text-emerald-700 mb-2">素材卡（实时更新）</div>
+          <div id="pcard-category" class="hidden mb-1"><span class="text-gray-500">类别：</span><span id="pcard-category-val" class="font-medium text-emerald-700"></span></div>
+          <div id="pcard-event" class="hidden mb-1"><span class="text-gray-500">事件：</span><span id="pcard-event-val" class="font-medium text-gray-800"></span></div>
+          <div id="pcard-details" class="hidden mb-1"><span class="text-gray-500">细节：</span><span id="pcard-details-val" class="text-gray-700"></span></div>
+          <div id="pcard-feeling" class="hidden mb-1"><span class="text-gray-500">当时感受：</span><span id="pcard-feeling-val" class="text-gray-700"></span></div>
+          <div id="pcard-reflection" class="hidden mb-1"><span class="text-gray-500">现在感悟：</span><span id="pcard-reflection-val" class="text-gray-700"></span></div>
+          <div id="pcard-topics" class="hidden mt-2 flex flex-wrap gap-1 items-center">
+            <span class="text-gray-500 mr-1">适用：</span><span id="pcard-topics-val"></span>
+          </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="flex gap-3">
+          <button id="btn-save-card" onclick="saveMaterialCard()" disabled
+            class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+            保存到个人素材库
+          </button>
+          <button onclick="resetSession()"
+            class="px-5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium py-2.5 rounded-xl text-sm transition-colors">
+            换话题
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 个人素材库 → 显示 -->
+    <section id="content-personal-bank" class="hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-semibold text-gray-800">个人素材库</h2>
+        <div class="flex gap-2 items-center">
+          <span id="personal-count" class="text-xs text-gray-400"></span>
+          <button onclick="clearPersonalBank()"
+            class="text-xs text-red-400 hover:text-red-600 border border-red-200 hover:border-red-400 px-3 py-1 rounded-full transition-colors">
+            清空
+          </button>
+        </div>
+      </div>
+      <div id="personal-type-filter" class="flex gap-2 flex-wrap mb-4"></div>
+      <div id="personal-list" class="space-y-3 pb-4"></div>
+      <div id="personal-empty" class="hidden text-center py-16 text-gray-300">
+        <div class="text-4xl mb-3">✍️</div>
+        <div class="text-sm">还没有素材卡，去「素材积累」对话吧</div>
+      </div>
+    </section>
+
+    <!-- 优秀作文 → 显示 -->
+    <section id="content-essays-bank" class="hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-semibold text-gray-800">素材库</h2>
+        <div class="flex gap-2 items-center">
+          <span id="bank-count" class="text-xs text-gray-400"></span>
+          <button id="btn-select-mode" onclick="toggleSelectionMode()"
+            class="text-xs text-gray-500 border border-gray-200 hover:border-gray-400 px-3 py-1 rounded-full transition-colors">
+            多选
+          </button>
+          <button onclick="clearBank()"
+            class="text-xs text-red-400 hover:text-red-600 border border-red-200 hover:border-red-400 px-3 py-1 rounded-full transition-colors">
+            清空
+          </button>
+        </div>
+      </div>
+
+      <!-- 多选操作栏（选择模式时显示） -->
+      <div id="select-bar" class="hidden flex items-center justify-between bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 mb-4">
+        <button onclick="toggleSelectAll()" id="btn-select-all"
+          class="text-xs text-emerald-600 hover:text-emerald-800 font-medium">全选</button>
+        <span id="select-count" class="text-xs text-gray-400">已选 0 项</span>
+        <button onclick="deleteSelected()"
+          class="text-xs text-white bg-red-500 hover:bg-red-600 px-4 py-1.5 rounded-full transition-colors font-medium">
+          删除选中
+        </button>
+      </div>
+
+      <!-- 类型筛选 -->
+      <div id="type-filter" class="flex gap-2 flex-wrap mb-4"></div>
+
+      <!-- 素材卡片列表 -->
+      <div id="bank-list" class="space-y-3 pb-4"></div>
+      <div id="bank-empty" class="hidden text-center py-16 text-gray-300">
+        <div class="text-4xl mb-3">📚</div>
+        <div class="text-sm">素材库为空，请先导入素材</div>
+      </div>
+    </section>
+
+    <!-- 描写技法 → 主页 -->
+    <section id="content-technique-home" class="hidden">
+
+      <!-- 导语卡片 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5">
+        <h2 class="text-base font-bold text-gray-800 mb-3">用多种描写手法把人物写「活」</h2>
+        <p class="text-sm text-gray-600 leading-7 mb-4">从故事选择角度，中考作文无非是<strong>写人、写经历的事、写见闻</strong>三种。描写、修辞是作文取得高分的技巧性元素，而这些元素切勿「张冠李戴」。举个例子，一篇写爷爷教我写书法的作文，主旨是赞美爷爷的品质，那么全文的描写技巧应该围绕爷爷——如果将大段人物描写放在「我学写书法」的过程上面，无疑是有失偏颇的。</p>
+
+        <!-- 三种写作角度 -->
+        <div class="space-y-3 mb-4">
+          <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-xs font-bold bg-emerald-600 text-white px-2.5 py-0.5 rounded-full">写人</span>
+              <span class="text-sm font-semibold text-gray-800">选取二三事，突出某人的品质</span>
+            </div>
+            <p class="text-xs text-gray-600 leading-6">主人公是「某人」，描写应围绕某人展开，笔墨尽量聚焦在某人身上。</p>
+          </div>
+          <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-xs font-bold bg-blue-600 text-white px-2.5 py-0.5 rounded-full">写经历</span>
+              <span class="text-sm font-semibold text-gray-800">聚焦一件事，突出「我」的成长</span>
+            </div>
+            <p class="text-xs text-gray-600 leading-6">主人公是「我」，突出通过这件事我懂得了什么、学会了什么。</p>
+          </div>
+          <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-xs font-bold bg-amber-600 text-white px-2.5 py-0.5 rounded-full">写见闻</span>
+              <span class="text-sm font-semibold text-gray-800">围绕某件事，人物越少越好</span>
+            </div>
+            <p class="text-xs text-gray-600 leading-6">侧重故事中人物的形象。篇幅有限，若有三四个人物均要分摊笔墨，结果必然是大崩盘。</p>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl px-4 py-3">
+          <p class="text-xs text-gray-600 leading-6">一篇优质的考场作文，<strong class="text-gray-800">描写手法必须俱全。</strong></p>
+        </div>
+      </div>
+
+      <!-- 五大描写技法 -->
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-1 mb-3">五大描写技法</p>
+      <div class="space-y-3 pb-4">
+
+        <!-- ① 环境描写 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <button onclick="toggleTechnique(1)"
+            class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+            <span class="w-8 h-8 rounded-full bg-emerald-600 text-white text-sm font-bold flex items-center justify-center shrink-0">①</span>
+            <div class="flex-1 min-w-0">
+              <div class="text-sm font-semibold text-gray-800">环境描写</div>
+              <div class="text-xs text-gray-400 mt-0.5">开篇引入 · 情景交融 · 兼顾点题</div>
+            </div>
+            <svg id="tech-icon-1" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div id="tech-body-1" class="hidden border-t border-gray-50 px-5 pb-5">
+            <ul class="space-y-3 mt-4 text-sm text-gray-600 leading-7">
+              <li class="flex gap-2"><span class="text-emerald-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">开篇</strong>：使用环境描写引入是高手常用的手法，能向阅卷人展示文字功底，先声夺人、制造好感。</span></li>
+              <li class="flex gap-2"><span class="text-emerald-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">中腹</strong>：文章中腹的环境描写须与营造的气氛、作者的心情相一致，达到「情景交融」的目的。</span></li>
+              <li class="flex gap-2"><span class="text-emerald-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">加分</strong>：环境描写如果能同时兼顾「点题」，效果更佳。</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ② 肖像描写 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <button onclick="toggleTechnique(2)"
+            class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+            <span class="w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center shrink-0">②</span>
+            <div class="flex-1 min-w-0">
+              <div class="text-sm font-semibold text-gray-800">肖像描写</div>
+              <div class="text-xs text-gray-400 mt-0.5">初见人物 · 外貌衣着 · 尽早使用</div>
+            </div>
+            <svg id="tech-icon-2" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div id="tech-body-2" class="hidden border-t border-gray-50 px-5 pb-5">
+            <ul class="space-y-3 mt-4 text-sm text-gray-600 leading-7">
+              <li class="flex gap-2"><span class="text-blue-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">时机</strong>：肖像描写要尽早使用。与人物初见时，习惯性地先刻画其外貌、衣着特征。</span></li>
+              <li class="flex gap-2"><span class="text-blue-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">聚焦</strong>：笔墨对准主人公，不要在次要人物身上浪费描写的篇幅。</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ③ 语言描写 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <button onclick="toggleTechnique(3)"
+            class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+            <span class="w-8 h-8 rounded-full bg-purple-600 text-white text-sm font-bold flex items-center justify-center shrink-0">③</span>
+            <div class="flex-1 min-w-0">
+              <div class="text-sm font-semibold text-gray-800">语言描写</div>
+              <div class="text-xs text-gray-400 mt-0.5">避免大段独白 · 穿插其他描写 · 词汇有亮点</div>
+            </div>
+            <svg id="tech-icon-3" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div id="tech-body-3" class="hidden border-t border-gray-50 px-5 pb-5">
+            <ul class="space-y-3 mt-4 text-sm text-gray-600 leading-7">
+              <li class="flex gap-2"><span class="text-purple-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">避免大段独白</strong>：不要让人物「把大段话一口气说完」，学会在对话中换行、停顿、穿插。</span></li>
+              <li class="flex gap-2"><span class="text-purple-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">穿插其他描写</strong>：对话过程中穿插动作描写、肖像描写、心理描写，使语言更有层次感。</span></li>
+              <li class="flex gap-2"><span class="text-purple-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">词汇有亮点</strong>：避免「他说」「他告诉我」等平淡词汇，改用更生动、更有个性的动词引导。</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ④ 心理描写 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <button onclick="toggleTechnique(4)"
+            class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+            <span class="w-8 h-8 rounded-full bg-rose-600 text-white text-sm font-bold flex items-center justify-center shrink-0">④</span>
+            <div class="flex-1 min-w-0">
+              <div class="text-sm font-semibold text-gray-800">心理描写</div>
+              <div class="text-xs text-gray-400 mt-0.5">「我」的内心 · 引导词汇 · 真实感受</div>
+            </div>
+            <svg id="tech-icon-4" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div id="tech-body-4" class="hidden border-t border-gray-50 px-5 pb-5">
+            <ul class="space-y-3 mt-4 text-sm text-gray-600 leading-7">
+              <li class="flex gap-2"><span class="text-rose-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">主体</strong>：心理描写指「我」的内心感受。写见闻或写人的作文，也以「我」的心理为主。</span></li>
+              <li class="flex gap-2"><span class="text-rose-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">引导词</strong>：用「我纳闷道」「我自责道」「我自宽道」「我暗暗发誓」等词汇自然引导心理活动。</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ⑤ 动作描写 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <button onclick="toggleTechnique(5)"
+            class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+            <span class="w-8 h-8 rounded-full bg-amber-600 text-white text-sm font-bold flex items-center justify-center shrink-0">⑤</span>
+            <div class="flex-1 min-w-0">
+              <div class="text-sm font-semibold text-gray-800">动作描写</div>
+              <div class="text-xs text-gray-400 mt-0.5">一连串动作 · 完整场景 · 画面感</div>
+            </div>
+            <svg id="tech-icon-5" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div id="tech-body-5" class="hidden border-t border-gray-50 px-5 pb-5">
+            <ul class="space-y-3 mt-4 text-sm text-gray-600 leading-7">
+              <li class="flex gap-2"><span class="text-amber-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">核心技巧</strong>：把句子写漂亮的关键是用「一连串的动作」来刻画一个完整的场景。</span></li>
+              <li class="flex gap-2"><span class="text-amber-500 shrink-0 mt-0.5">▸</span><span><strong class="text-gray-700">目标</strong>：让读者在脑海中形成清晰的画面感，如同身临其境看到了这个场景。</span></li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 描写技法 → 导入（从优秀作文库选择） -->
+    <section id="content-technique-import" class="hidden">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-base font-semibold text-gray-800">选择范文</h2>
+        <span id="technique-import-count" class="text-xs text-gray-400"></span>
+      </div>
+      <p class="text-xs text-gray-500 mb-4">点击勾选，被选中的作文将在「显示」标签中展示为技法参考范例。</p>
+      <div id="technique-import-list" class="space-y-3 pb-4"></div>
+      <div id="technique-import-empty" class="hidden text-center py-16 text-gray-300">
+        <div class="text-4xl mb-3">📚</div>
+        <div class="text-sm">优秀作文库为空，请先在「优秀作文 → 导入」中添加作文</div>
+      </div>
+    </section>
+
+    <!-- 描写技法 → 显示（已选范文） -->
+    <section id="content-technique-bank" class="hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-semibold text-gray-800">技法参考范文</h2>
+        <span id="technique-bank-count" class="text-xs text-gray-400"></span>
+      </div>
+      <div id="technique-bank-list" class="space-y-3 pb-4"></div>
+      <div id="technique-bank-empty" class="hidden text-center py-16 text-gray-300">
+        <div class="text-4xl mb-3">📖</div>
+        <div class="text-sm">还没有选择范文，去「导入」标记吧</div>
+      </div>
+    </section>
+
+    <!-- 格局提升 → 主页（格局三角） -->
+    <section id="content-pattern-home" class="hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+        <p class="text-xs text-gray-500 leading-6">格局三角将作文选材分为三大维度。在「导览」中查看每个格局的详解与范文。</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 overflow-x-auto">
+        <div style="min-width:600px">
+          <svg viewBox="0 0 660 490" xmlns="http://www.w3.org/2000/svg" class="w-full block">
+            <!-- 标题 -->
+            <text x="14" y="30" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="16" font-weight="bold" fill="#dc2626">格局，决定分数</text>
+
+            <!-- 三角形 -->
+            <polygon points="215,72 60,400 365,400" fill="#16a34a"/>
+
+            <!-- 生命（三角形内居中） -->
+            <text x="215" y="254" text-anchor="middle" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="30" font-weight="bold" fill="white">生命</text>
+
+            <!-- ── 社会我（三角形上方右侧，大字标签） ── -->
+            <text x="228" y="67" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="24" font-weight="bold" fill="#14532d">社会我</text>
+            <line x1="333" y1="50"  x2="333" y2="150" stroke="#555" stroke-width="1.5"/>
+            <line x1="325" y1="50"  x2="333" y2="50"  stroke="#555" stroke-width="1.5"/>
+            <line x1="325" y1="150" x2="333" y2="150" stroke="#555" stroke-width="1.5"/>
+            <text x="340" y="67"  font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">博爱与冷漠——培养博爱的情怀</text>
+            <text x="340" y="87"  font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">精彩与倦怠——定格校园的生活</text>
+            <text x="340" y="107" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">栖居与漂泊——安顿心灵的自我</text>
+            <text x="340" y="127" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">回眸与前瞻——审视发展的路径</text>
+
+            <!-- ── 文化我（三角形右侧，标签居中，两行缩进格式） ── -->
+            <text x="376" y="296" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="24" font-weight="bold" fill="#14532d">文化我</text>
+            <line x1="468" y1="200" x2="468" y2="378" stroke="#555" stroke-width="1.5"/>
+            <line x1="460" y1="200" x2="468" y2="200" stroke="#555" stroke-width="1.5"/>
+            <line x1="460" y1="378" x2="468" y2="378" stroke="#555" stroke-width="1.5"/>
+            <text x="475" y="214" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">皈依与颠覆——</text>
+            <text x="491" y="230" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">进行哲理的追问</text>
+            <text x="475" y="253" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">原型与变异——</text>
+            <text x="491" y="269" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">解剖文学的原型</text>
+            <text x="475" y="292" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">壮美与优美——</text>
+            <text x="491" y="308" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">感悟美学的真谛</text>
+            <text x="475" y="331" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">实证与创新——</text>
+            <text x="491" y="347" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">理解科学的精神</text>
+
+            <!-- ── 自然我（三角形外左下，大字标签，深色文字） ── -->
+            <text x="47" y="458" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="24" font-weight="bold" fill="#14532d">自然我</text>
+            <line x1="158" y1="408" x2="158" y2="482" stroke="#555" stroke-width="1.5"/>
+            <line x1="150" y1="408" x2="158" y2="408" stroke="#555" stroke-width="1.5"/>
+            <line x1="150" y1="482" x2="158" y2="482" stroke="#555" stroke-width="1.5"/>
+            <text x="165" y="416" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">自卑与超越——提升镜中的自我</text>
+            <text x="165" y="436" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">崇高与卑鄙——透视人性的优劣</text>
+            <text x="165" y="456" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">青春与衰老——品味岁月的魅力</text>
+            <text x="165" y="476" font-family="PingFang SC,Hiragino Sans GB,Microsoft YaHei,sans-serif" font-size="13" fill="#374151">瞬间与永恒——直面生命的两极</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 格局提升 → 导览 -->
+    <section id="content-pattern-guide" class="hidden">
+      <p class="text-xs text-gray-400 mb-4 px-1">点击展开详解，范例可直接跳转到对应作文（需先在「优秀作文」中导入）。</p>
+      <div id="pattern-guide-list" class="space-y-3 pb-4"></div>
+    </section>
+
+    <!-- 套题技巧 → 主页 -->
+    <section id="content-cloze-home" class="hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5">
+        <h2 class="text-base font-bold text-gray-800 mb-3">技术性点题</h2>
+        <p class="text-sm text-gray-600 leading-7">点题是考场作文一大难点。大多数同学仅能做到「不偏题」，却无法做到「技术性点题」。掌握以下六条技巧，让点题成为你的加分利器。</p>
+      </div>
+
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-1 mb-3">六大点题技巧</p>
+      <div class="space-y-2 pb-4">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex gap-3 items-start">
+          <span class="w-8 h-8 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center shrink-0">⑴</span>
+          <p class="text-sm text-gray-700 leading-7 pt-0.5">优秀作文点题为 <strong class="text-orange-600">3–5 次</strong></p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex gap-3 items-start">
+          <span class="w-8 h-8 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center shrink-0">⑵</span>
+          <p class="text-sm text-gray-700 leading-7 pt-0.5">不仅要拿<strong class="text-orange-600">「原题」</strong>点题，更要会<strong class="text-orange-600">「拆题」</strong>来点题</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex gap-3 items-start">
+          <span class="w-8 h-8 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center shrink-0">⑶</span>
+          <p class="text-sm text-gray-700 leading-7 pt-0.5">文章<strong class="text-orange-600">前两段</strong>必须要点题</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex gap-3 items-start">
+          <span class="w-8 h-8 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center shrink-0">⑷</span>
+          <p class="text-sm text-gray-700 leading-7 pt-0.5">点题时尽量做到<strong class="text-orange-600">「独立成段」</strong>，或置于<strong class="text-orange-600">段首、段尾</strong></p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex gap-3 items-start">
+          <span class="w-8 h-8 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center shrink-0">⑸</span>
+          <p class="text-sm text-gray-700 leading-7 pt-0.5"><strong class="text-orange-600">末段点题</strong>成败在此一举，学会写<strong class="text-orange-600">「递进式排比句」</strong></p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex gap-3 items-start">
+          <span class="w-8 h-8 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center shrink-0">⑹</span>
+          <p class="text-sm text-gray-700 leading-7 pt-0.5">让你的<strong class="text-orange-600">标题</strong>成为<strong class="text-orange-600">「全文线索」</strong></p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 套题技巧 → 导入 -->
+    <section id="content-cloze-import" class="hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="text-base font-semibold text-gray-800 mb-1">导入对照范例</h2>
+        <p class="text-xs text-gray-400 mb-5">分别粘贴库存作文和考场作文的 JSON，字段：title / content</p>
+
+        <!-- 库存作文 -->
+        <div class="mb-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-bold bg-blue-600 text-white px-2.5 py-0.5 rounded-full">库存作文</span>
+            <span class="text-xs text-gray-400">考前准备的素材作文</span>
+          </div>
+          <textarea id="cloze-stock-input"
+            class="w-full h-32 text-sm font-mono border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-300"
+            placeholder='{"title": "爷爷的书法", "content": "文章正文..."}'></textarea>
+          <div id="cloze-stock-preview" class="hidden mt-2 p-2.5 bg-blue-50 rounded-xl text-xs text-blue-700 font-medium"></div>
+        </div>
+
+        <!-- 考场作文 -->
+        <div class="mb-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-bold bg-amber-500 text-white px-2.5 py-0.5 rounded-full">考场作文</span>
+            <span class="text-xs text-gray-400">套题后的考场改写版</span>
+          </div>
+          <textarea id="cloze-exam-input"
+            class="w-full h-32 text-sm font-mono border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-amber-400 placeholder-gray-300"
+            placeholder='{"title": "那时书声琅琅（改）", "content": "考场改写版正文..."}'></textarea>
+          <div id="cloze-exam-preview" class="hidden mt-2 p-2.5 bg-amber-50 rounded-xl text-xs text-amber-700 font-medium"></div>
+        </div>
+
+        <div id="cloze-import-error" class="hidden mb-3 text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2"></div>
+
+        <div class="flex gap-3">
+          <button onclick="saveClozeExample()"
+            class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
+            保存为新范例
+          </button>
+          <button onclick="clearClozeImport()"
+            class="px-5 bg-gray-100 hover:bg-gray-200 text-gray-500 font-medium py-2.5 rounded-xl text-sm transition-colors">
+            清空
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 套题技巧 → 显示 -->
+    <section id="content-cloze-bank" class="hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-semibold text-gray-800">套题范例库</h2>
+        <div class="flex gap-2 items-center">
+          <span id="cloze-bank-count" class="text-xs text-gray-400"></span>
+          <button onclick="clearClozeBank()"
+            class="text-xs text-red-400 hover:text-red-600 border border-red-200 hover:border-red-400 px-3 py-1 rounded-full transition-colors">
+            清空
+          </button>
+        </div>
+      </div>
+      <div id="cloze-bank-list" class="space-y-4 pb-4"></div>
+      <div id="cloze-bank-empty" class="hidden text-center py-16 text-gray-300">
+        <div class="text-4xl mb-3">📝</div>
+        <div class="text-sm">还没有范例，去「导入」添加对照作文吧</div>
+      </div>
+    </section>
+
+    <!-- 21天计划（待定） -->
+    <section id="content-plan-home" class="hidden">
+      <div class="text-center py-24 text-gray-300">
+        <div class="text-5xl mb-4">📅</div>
+        <div class="text-sm font-medium text-gray-400">21天计划</div>
+        <div class="text-xs mt-1">即将推出</div>
+      </div>
+    </section>
+
+    <!-- 设置 -->
+    <section id="content-settings-home" class="hidden space-y-4">
+
+      <!-- Gitee 同步 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="text-base font-bold text-gray-800 mb-1">跨设备同步（Gitee）</h2>
+        <p class="text-xs text-gray-400 mb-4 leading-5">将全部数据备份到 Gitee 私有仓库，在另一台设备上填入相同配置后点「拉取」即可同步。</p>
+
+        <div class="space-y-3 mb-4">
+          <div>
+            <label class="text-xs font-medium text-gray-600 block mb-1">Personal Access Token</label>
+            <input id="s-gitee-token" type="password"
+              class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              placeholder="在 Gitee → 设置 → 私人令牌 生成（需勾选 projects 权限）" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-medium text-gray-600 block mb-1">用户名（Owner）</label>
+              <input id="s-gitee-owner" type="text"
+                class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                placeholder="e.g. zhangsan" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-600 block mb-1">仓库名（Repo）</label>
+              <input id="s-gitee-repo" type="text"
+                class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                placeholder="e.g. mydata" />
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600 block mb-1">文件路径</label>
+            <input id="s-gitee-path" type="text"
+              class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              placeholder="sprint60-data.json" />
+          </div>
+        </div>
+
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="saveGiteeSettings()"
+            class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors">
+            保存配置
+          </button>
+          <button onclick="pushToGitee()" id="btn-push"
+            class="px-4 py-2 text-sm bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-colors">
+            ↑ 推送到 Gitee
+          </button>
+          <button onclick="pullFromGitee()" id="btn-pull"
+            class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors">
+            ↓ 从 Gitee 拉取
+          </button>
+        </div>
+        <div id="sync-status" class="hidden mt-3 text-xs px-3 py-2 rounded-lg"></div>
+      </div>
+
+      <!-- DeepSeek API Key -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="text-base font-bold text-gray-800 mb-1">AI 设置（DeepSeek）</h2>
+        <p class="text-xs text-gray-400 mb-3">用于「素材积累」模块的 AI 对话，Key 仅存于本地浏览器。</p>
+        <div class="flex gap-2">
+          <input id="s-deepseek-key" type="password"
+            class="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            placeholder="sk-..." />
+          <button onclick="saveDeepseekKeyFromSettings()"
+            class="px-4 py-2 text-sm bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-colors">
+            保存
+          </button>
+        </div>
+        <p id="s-deepseek-status" class="text-xs text-gray-400 mt-2"></p>
+      </div>
+
+      <!-- 数据概览 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="text-base font-bold text-gray-800 mb-3">本地数据概览</h2>
+        <div id="data-overview" class="space-y-2 text-sm text-gray-600"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- 成功提示 Toast -->
+  <div id="toast"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-sm px-5 py-2.5 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50">
+  </div>
+
+  <script>
+    // ——— 数据层 ———
+    // 存储结构：{ version, updatedAt, items: [...] }
+    // 设计为单一 JSON 对象，方便未来整体同步到 Gitee 的一个文件
+    const STORAGE_KEY = 'sprint60_v2';
+    const API_KEY_STORAGE = 'sprint60_deepseek_key';
+
+    function loadStore() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch {}
+      return { version: 1, updatedAt: null, items: [] };
+    }
+
+    function saveStore(store) {
+      store.updatedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    }
+
+    function loadBank() {
+      return loadStore().items;
+    }
+
+    function saveBank(items) {
+      const store = loadStore();
+      store.items = items;
+      saveStore(store);
+    }
+
+    function newId() {
+      // crypto.randomUUID 在现代浏览器和 PWA 均可用
+      return typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    // ——— 临时预览数据 ———
+    let pendingItems = [];
+    // conflictChoices: { [id]: 'overwrite' | 'skip' }
+    let conflictChoices = {};
+
+    // ——— 导航配置 ———
+    // 第一行：主模块
+    const SECTIONS = {
+      essays:    { label: '优秀作文', tabs: [{id:'essays-import',label:'导入'},{id:'essays-bank',label:'显示'}] },
+      technique: { label: '描写技法', tabs: [{id:'technique-home',label:'主页'},{id:'technique-import',label:'导入'},{id:'technique-bank',label:'显示'}] },
+      pattern:   { label: '格局提升', tabs: [{id:'pattern-home',label:'主页'},{id:'pattern-guide',label:'导览'}] },
+      cloze:     { label: '套题技巧', tabs: [{id:'cloze-home',label:'主页'},{id:'cloze-import',label:'导入'},{id:'cloze-bank',label:'显示'}] },
+      settings:  { label: '设置',     tabs: [] }
+    };
+    // 第二行左侧固定：次要模块
+    const SECONDARY = {
+      personal: { label: '个人素材库', tabs: [{id:'personal-accumulate',label:'素材积累'},{id:'personal-bank',label:'显示'}] },
+      plan:     { label: '21天计划',   tabs: [] }
+    };
+
+    const ALL_CONTENT_IDS = ['essays-import','essays-bank','personal-accumulate','personal-bank',
+      'technique-home','technique-import','technique-bank','pattern-home','pattern-guide',
+      'cloze-home','cloze-import','cloze-bank','plan-home','settings-home'];
+
+    let activeSection = 'essays';
+    let activeContentId = 'essays-import';
+
+    function showSection(name) {
+      activeSection = name;
+      const sec = SECTIONS[name] || SECONDARY[name];
+      showContent(sec.tabs.length ? sec.tabs[0].id : name + '-home');
+    }
+
+    function showContent(contentId) {
+      activeContentId = contentId;
+      ALL_CONTENT_IDS.forEach(id => {
+        document.getElementById('content-' + id).classList.toggle('hidden', id !== contentId);
+      });
+      renderTopNav();
+      renderRow2();
+      if (contentId === 'essays-bank') renderBank();
+      if (contentId === 'personal-bank') renderPersonalBank();
+      if (contentId === 'personal-accumulate') initAccumTab();
+      if (contentId === 'technique-import') renderTechniqueImport();
+      if (contentId === 'technique-bank') renderTechniqueBank();
+      if (contentId === 'pattern-guide') renderPatternGuide();
+      if (contentId === 'cloze-bank') renderClozeBank();
+      if (contentId === 'settings-home') renderSettings();
+    }
+
+    function renderTopNav() {
+      document.getElementById('top-nav').innerHTML = Object.entries(SECTIONS).map(([key, sec]) =>
+        `<button onclick="showSection('${key}')" class="px-3 py-1.5 rounded-full font-medium whitespace-nowrap transition-colors text-sm ${activeSection === key ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-100'}">${sec.label}</button>`
+      ).join('');
+    }
+
+    function renderRow2() {
+      // 左侧固定按钮
+      ['personal','plan'].forEach(key => {
+        const btn = document.getElementById('nav-' + key);
+        const isActive = activeSection === key;
+        btn.className = `px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${isActive ? 'bg-gray-800 text-white' : 'text-gray-500 hover:bg-gray-100'}`;
+      });
+      // 右侧子标签
+      const sec = SECTIONS[activeSection] || SECONDARY[activeSection];
+      const sep = document.getElementById('sub-nav-sep');
+      const subNav = document.getElementById('sub-nav');
+      if (sec && sec.tabs.length) {
+        sep.classList.remove('hidden');
+        subNav.innerHTML = sec.tabs.map(tab =>
+          `<button onclick="showContent('${tab.id}')" class="px-3 py-1 rounded-full text-xs font-medium transition-colors ${activeContentId === tab.id ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-100'}">${tab.label}</button>`
+        ).join('');
+      } else {
+        sep.classList.add('hidden');
+        subNav.innerHTML = '';
+      }
+    }
+
+    // ——— 设置 & Gitee 同步 ———
+    const SETTINGS_KEY = 'sprint60_settings';
+    const SYNC_STORE_KEYS = ['sprint60_v2','sprint60_personal_v1','sprint60_cloze_v1','sprint60_technique_ids'];
+    const GITEE_API = 'https://gitee.com/api/v5';
+
+    function loadSettings() {
+      try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch { return {}; }
+    }
+    function saveSettings(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+
+    // Unicode-safe base64
+    function toBase64(str) {
+      return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+        (_, p) => String.fromCharCode(parseInt(p, 16))));
+    }
+    function fromBase64(b64) {
+      return decodeURIComponent(Array.from(atob(b64.replace(/\n/g, '')))
+        .map(c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join(''));
+    }
+
+    function setSyncStatus(msg, isErr) {
+      const el = document.getElementById('sync-status');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `mt-3 text-xs px-3 py-2 rounded-lg ${isErr ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-700'}`;
+      el.classList.remove('hidden');
+    }
+    function setSyncBusy(busy) {
+      ['btn-push','btn-pull'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) b.disabled = busy;
+      });
+    }
+
+    function saveGiteeSettings() {
+      const s = loadSettings();
+      s.giteeToken = document.getElementById('s-gitee-token').value.trim();
+      s.giteeOwner = document.getElementById('s-gitee-owner').value.trim();
+      s.giteeRepo  = document.getElementById('s-gitee-repo').value.trim();
+      s.giteePath  = document.getElementById('s-gitee-path').value.trim() || 'sprint60-data.json';
+      saveSettings(s);
+      showToast('配置已保存');
+    }
+
+    async function pushToGitee() {
+      const s = loadSettings();
+      if (!s.giteeToken || !s.giteeOwner || !s.giteeRepo) {
+        setSyncStatus('请先保存 Gitee 配置', true); return;
+      }
+      setSyncBusy(true);
+      setSyncStatus('正在推送…', false);
+      try {
+        const path = s.giteePath || 'sprint60-data.json';
+        const data = {};
+        SYNC_STORE_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v) data[k] = v; });
+        const content = toBase64(JSON.stringify(data, null, 2));
+        const url = `${GITEE_API}/repos/${s.giteeOwner}/${s.giteeRepo}/contents/${path}`;
+
+        // 获取当前 sha（文件不存在则 sha=null）
+        let sha = null;
+        const getRes = await fetch(`${url}?access_token=${s.giteeToken}`);
+        if (getRes.ok) { sha = (await getRes.json()).sha; }
+
+        const body = { access_token: s.giteeToken, message: `sync ${new Date().toISOString()}`, content };
+        if (sha) body.sha = sha;
+        const putRes = await fetch(url, {
+          method: sha ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (putRes.ok) {
+          setSyncStatus(`推送成功 ${new Date().toLocaleTimeString()}`, false);
+        } else {
+          const txt = await putRes.text();
+          setSyncStatus('推送失败：' + txt.slice(0, 80), true);
+        }
+      } catch (e) {
+        setSyncStatus('网络错误：' + e.message, true);
+      } finally {
+        setSyncBusy(false);
+      }
+    }
+
+    async function pullFromGitee() {
+      const s = loadSettings();
+      if (!s.giteeToken || !s.giteeOwner || !s.giteeRepo) {
+        setSyncStatus('请先保存 Gitee 配置', true); return;
+      }
+      setSyncBusy(true);
+      setSyncStatus('正在拉取…', false);
+      try {
+        const path = s.giteePath || 'sprint60-data.json';
+        const url = `${GITEE_API}/repos/${s.giteeOwner}/${s.giteeRepo}/contents/${path}?access_token=${s.giteeToken}`;
+        const res = await fetch(url);
+        if (!res.ok) { setSyncStatus('拉取失败，检查配置或仓库是否存在', true); return; }
+        const json = await res.json();
+        const data = JSON.parse(fromBase64(json.content));
+        SYNC_STORE_KEYS.forEach(k => { if (data[k] !== undefined) localStorage.setItem(k, data[k]); });
+        setSyncStatus(`拉取成功 ${new Date().toLocaleTimeString()}，刷新页面以生效`, false);
+        renderSettings(); // 更新数据概览
+      } catch (e) {
+        setSyncStatus('解析失败：' + e.message, true);
+      } finally {
+        setSyncBusy(false);
+      }
+    }
+
+    function saveDeepseekKeyFromSettings() {
+      const key = document.getElementById('s-deepseek-key').value.trim();
+      if (!key) { showToast('请输入 API Key'); return; }
+      localStorage.setItem(API_KEY_STORAGE, key);
+      updateApiKeyStatus();
+      document.getElementById('s-deepseek-status').textContent = '已保存';
+      showToast('DeepSeek Key 已保存');
+    }
+
+    function renderSettings() {
+      const s = loadSettings();
+      const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+      setVal('s-gitee-token', s.giteeToken);
+      setVal('s-gitee-owner', s.giteeOwner);
+      setVal('s-gitee-repo',  s.giteeRepo);
+      setVal('s-gitee-path',  s.giteePath || 'sprint60-data.json');
+      setVal('s-deepseek-key', localStorage.getItem(API_KEY_STORAGE) || '');
+      const statusEl = document.getElementById('s-deepseek-status');
+      if (statusEl) statusEl.textContent = localStorage.getItem(API_KEY_STORAGE) ? '✓ 已设置' : '未设置';
+      // 数据概览
+      const ov = document.getElementById('data-overview');
+      if (ov) {
+        const rows = [
+          { label: '优秀作文库',   key: 'sprint60_v2' },
+          { label: '个人素材库',   key: 'sprint60_personal_v1' },
+          { label: '套题对照库',   key: 'sprint60_cloze_v1' },
+        ].map(r => {
+          let count = '—';
+          try { const d = JSON.parse(localStorage.getItem(r.key) || '{}'); count = (d.items||[]).length + ' 条'; } catch {}
+          return `<div class="flex justify-between py-1 border-b border-gray-50 last:border-0">
+            <span class="text-gray-500">${r.label}</span><span class="font-medium text-gray-800">${count}</span></div>`;
+        });
+        ov.innerHTML = rows.join('');
+      }
+    }
+
+    // ——— JSON 修复：处理字符串内未转义的换行/制表符/智能引号 ———
+    function repairJSON(s) {
+      // 去 BOM
+      s = s.replace(/^﻿/, '');
+      // 中文弯引号 → 直引号
+      s = s.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+      // 去尾部多余逗号
+      s = s.replace(/,(\s*[}\]])/g, '$1');
+      // 修复字符串内的裸换行/回车/制表符
+      let out = '', inStr = false, esc = false;
+      for (let i = 0; i < s.length; i++) {
+        const c = s[i];
+        if (esc)            { out += c; esc = false; continue; }
+        if (c === '\\' && inStr) { out += c; esc = true; continue; }
+        if (c === '"')      { inStr = !inStr; out += c; continue; }
+        if (inStr) {
+          if      (c === '\n') { out += '\\n'; continue; }
+          else if (c === '\r') { out += '\\r'; continue; }
+          else if (c === '\t') { out += '\\t'; continue; }
+        }
+        out += c;
+      }
+      return out;
+    }
+
+    // ——— 导入 JSON ———
+    function importJSON() {
+      const raw = document.getElementById('json-input').value.trim();
+      const errEl = document.getElementById('json-error');
+
+      if (!raw) {
+        showError('请先粘贴 JSON 内容');
+        return;
+      }
+
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (e1) {
+        try {
+          parsed = JSON.parse(repairJSON(raw));
+        } catch (e2) {
+          showError('JSON 格式错误：' + e2.message);
+          return;
+        }
+      }
+
+      const items = Array.isArray(parsed) ? parsed : [parsed];
+      const valid = [];
+      const errors = [];
+
+      items.forEach((item, i) => {
+        const label = `第 ${i + 1} 条`;
+        if (!item.type)    { errors.push(`${label} 缺少 "type" 字段`); return; }
+        if (!item.title)   { errors.push(`${label} 缺少 "title" 字段`); return; }
+        if (!item.content) { errors.push(`${label} 缺少 "content" 字段`); return; }
+        valid.push({ id: newId(), createdAt: new Date().toISOString(), type: String(item.type), title: String(item.title), content: String(item.content), comment: item.comment ? String(item.comment) : '' });
+      });
+
+      if (errors.length) {
+        showError(errors.join('；'));
+        return;
+      }
+
+      errEl.classList.add('hidden');
+      pendingItems = valid;
+      conflictChoices = {};
+
+      // 检测重名（按 title 匹配）
+      const bank = loadBank();
+      const existingTitles = new Set(bank.map(e => e.title));
+      const newItems = valid.filter(e => !existingTitles.has(e.title));
+      const conflicts = valid.filter(e => existingTitles.has(e.title));
+      conflicts.forEach(e => { conflictChoices[e.id] = 'skip'; }); // 默认跳过
+
+      showPreview(newItems, conflicts);
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('json-error');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      document.getElementById('preview-area').classList.add('hidden');
+    }
+
+    function showPreview(newItems, conflicts = []) {
+      const area = document.getElementById('preview-area');
+      const list = document.getElementById('preview-list');
+      const count = document.getElementById('preview-count');
+
+      const total = newItems.length + conflicts.length;
+      count.textContent = `共 ${total} 篇${conflicts.length ? `，${conflicts.length} 篇重名` : ''}`;
+
+      let html = '';
+      if (conflicts.length) {
+        html += `<div class="mb-3 text-xs font-semibold text-amber-600 bg-amber-50 rounded-xl px-4 py-2">以下 ${conflicts.length} 篇与库中已有作文同名，请逐条选择处理方式</div>`;
+        html += conflicts.map(item => conflictCard(item)).join('');
+      }
+      if (newItems.length) {
+        if (conflicts.length) html += `<div class="mb-2 mt-4 text-xs font-semibold text-gray-400 px-1">新增（${newItems.length} 篇）</div>`;
+        html += newItems.map(item => previewCard(item)).join('');
+      }
+
+      list.innerHTML = html;
+      area.classList.remove('hidden');
+    }
+
+    function conflictCard(item) {
+      const _plain = stripHtml(item.content);
+      const preview = escHtml(_plain.length > 80 ? _plain.slice(0, 80) + '…' : _plain);
+      return `
+        <div class="bg-white border border-amber-200 rounded-xl p-4 card-enter mb-3">
+          <div class="flex items-start gap-2 mb-2">
+            <span class="text-xs font-medium bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full shrink-0">${escHtml(item.type)}</span>
+            <span class="text-sm font-semibold text-gray-800 flex-1">${escHtml(item.title)}</span>
+            <span class="text-xs text-amber-500 shrink-0">重名</span>
+          </div>
+          <p class="text-xs text-gray-400 leading-5 mb-3">${preview}</p>
+          <div class="flex gap-2">
+            <button id="btn-overwrite-${item.id}" onclick="setConflictChoice('${item.id}','overwrite')"
+              class="flex-1 text-xs py-1.5 rounded-lg border border-emerald-300 text-emerald-600 hover:bg-emerald-50 transition-colors">
+              覆盖旧的
+            </button>
+            <button id="btn-skip-${item.id}" onclick="setConflictChoice('${item.id}','skip')"
+              class="flex-1 text-xs py-1.5 rounded-lg border border-gray-200 bg-gray-100 text-gray-500 font-medium transition-colors">
+              跳过
+            </button>
+          </div>
+        </div>`;
+    }
+
+    function setConflictChoice(id, choice) {
+      conflictChoices[id] = choice;
+      const btnOverwrite = document.getElementById(`btn-overwrite-${id}`);
+      const btnSkip = document.getElementById(`btn-skip-${id}`);
+      if (choice === 'overwrite') {
+        btnOverwrite.className = 'flex-1 text-xs py-1.5 rounded-lg border border-emerald-500 bg-emerald-600 text-white font-medium transition-colors';
+        btnSkip.className = 'flex-1 text-xs py-1.5 rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 transition-colors';
+      } else {
+        btnSkip.className = 'flex-1 text-xs py-1.5 rounded-lg border border-gray-200 bg-gray-100 text-gray-500 font-medium transition-colors';
+        btnOverwrite.className = 'flex-1 text-xs py-1.5 rounded-lg border border-emerald-300 text-emerald-600 hover:bg-emerald-50 transition-colors';
+      }
+    }
+
+    function previewCard(item) {
+      const _plain = stripHtml(item.content);
+      const preview = escHtml(_plain.length > 120 ? _plain.slice(0, 120) + '…' : _plain);
+      const _cmt = item.comment ? stripHtml(item.comment) : '';
+      const commentHtml = _cmt
+        ? `<div class="mt-2 pt-2 border-t border-gray-100 text-xs text-amber-600 leading-5"><span class="font-medium">点评：</span>${escHtml(_cmt.length > 80 ? _cmt.slice(0, 80) + '…' : _cmt)}</div>`
+        : '';
+      return `
+        <div class="bg-white border border-gray-100 rounded-xl p-4 card-enter">
+          <div class="flex items-start gap-2 mb-2">
+            <span class="text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full shrink-0">${escHtml(item.type)}</span>
+            <span class="text-sm font-semibold text-gray-800">${escHtml(item.title)}</span>
+          </div>
+          <p class="text-xs text-gray-400 leading-5">${preview}</p>
+          ${commentHtml}
+        </div>`;
+    }
+
+    // ——— 确认入库 ———
+    function confirmImport() {
+      if (!pendingItems.length) return;
+      let bank = loadBank();
+      let added = 0, overwritten = 0, skipped = 0;
+
+      pendingItems.forEach(item => {
+        const choice = conflictChoices[item.id]; // undefined = 新增，'overwrite'/'skip' = 冲突项
+        if (choice === 'skip') {
+          skipped++;
+        } else if (choice === 'overwrite') {
+          bank = bank.map(e => e.title === item.title ? { ...item, id: e.id, createdAt: e.createdAt } : e);
+          overwritten++;
+        } else {
+          bank.push(item);
+          added++;
+        }
+      });
+
+      saveBank(bank);
+      pendingItems = [];
+      conflictChoices = {};
+
+      document.getElementById('json-input').value = '';
+      document.getElementById('preview-area').classList.add('hidden');
+      document.getElementById('json-error').classList.add('hidden');
+
+      const parts = [];
+      if (added)       parts.push(`新增 ${added} 篇`);
+      if (overwritten) parts.push(`覆盖 ${overwritten} 篇`);
+      if (skipped)     parts.push(`跳过 ${skipped} 篇`);
+      showToast(`${parts.join('，')}，素材库共 ${bank.length} 篇`);
+      showContent('essays-bank');
+    }
+
+    function clearInput() {
+      document.getElementById('json-input').value = '';
+      document.getElementById('preview-area').classList.add('hidden');
+      document.getElementById('json-error').classList.add('hidden');
+      pendingItems = [];
+    }
+
+    // ——— 渲染素材库 ———
+    let activeType = 'all';
+    let selectionMode = false;
+    let selectedIds = new Set();
+
+    function renderBank() {
+      const bank = loadBank();
+      const countEl = document.getElementById('bank-count');
+      const listEl = document.getElementById('bank-list');
+      const emptyEl = document.getElementById('bank-empty');
+      const filterEl = document.getElementById('type-filter');
+
+      countEl.textContent = `共 ${bank.length} 篇`;
+
+      // 类型标签
+      const types = ['all', ...new Set(bank.map(e => e.type))];
+      filterEl.innerHTML = types.map(t => `
+        <button onclick="filterType('${escHtml(t)}')" data-type="${escHtml(t)}"
+          class="type-tag text-xs px-3 py-1 rounded-full border transition-colors ${activeType === t ? 'bg-emerald-600 text-white border-emerald-600' : 'text-gray-500 border-gray-200 hover:border-emerald-400'}">
+          ${t === 'all' ? '全部' : escHtml(t)}
+        </button>`).join('');
+
+      const filtered = activeType === 'all' ? bank : bank.filter(e => e.type === activeType);
+
+      if (!filtered.length) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+      emptyEl.classList.add('hidden');
+      listEl.innerHTML = filtered.map((item, idx) => bankCard(item, idx)).join('');
+    }
+
+    function bankCard(item) {
+      const _plain = stripHtml(item.content);
+      const preview = escHtml(_plain.length > 80 ? _plain.slice(0, 80) + '…' : _plain);
+      const isSelected = selectedIds.has(item.id);
+
+      if (selectionMode) {
+        return `
+          <div onclick="toggleSelect('${item.id}')" id="card-${item.id}"
+            class="bg-white border rounded-xl p-4 card-enter cursor-pointer transition-colors ${isSelected ? 'border-red-400 bg-red-50' : 'border-gray-100 hover:border-gray-300'}">
+            <div class="flex items-start gap-3">
+              <div class="mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? 'border-red-500 bg-red-500' : 'border-gray-300'}">
+                ${isSelected ? '<svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full shrink-0">${escHtml(item.type)}</span>
+                  <span class="text-sm font-semibold text-gray-800 truncate">${escHtml(item.title)}</span>
+                </div>
+                <p class="text-xs text-gray-400 leading-5">${preview}</p>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      const commentBlock = item.comment
+        ? `<div id="comment-${item.id}" class="hidden px-4 pb-4 text-sm text-amber-700 leading-7 bg-amber-50 border-t border-amber-100"><span class="font-medium text-amber-500 text-xs block mb-1">点评</span>${sanitizeHtml(item.comment)}</div>`
+        : '';
+      const commentBtn = item.comment
+        ? `<button id="btn-comment-${item.id}" onclick="toggleComment('${item.id}')" class="text-xs text-amber-500 hover:text-amber-700 ml-3">查看点评</button>`
+        : '';
+      return `
+        <div id="card-${item.id}" class="bg-white border border-gray-100 rounded-xl overflow-hidden card-enter">
+          <div class="p-4">
+            <div class="flex items-start gap-2 mb-1">
+              <span class="text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full shrink-0">${escHtml(item.type)}</span>
+              <span class="text-sm font-semibold text-gray-800 flex-1">${escHtml(item.title)}</span>
+              <button onclick="editBankItem('${item.id}')" class="text-gray-300 hover:text-blue-400 transition-colors text-xs shrink-0">编辑</button>
+              <button onclick="deleteItem('${item.id}')" class="text-gray-300 hover:text-red-400 transition-colors text-xs shrink-0 ml-1">✕</button>
+            </div>
+            <p class="text-xs text-gray-400 leading-5 mt-2">${preview}</p>
+          </div>
+          <div class="border-t border-gray-50 px-4 py-2 flex items-center">
+            <button id="btn-exp-${item.id}" onclick="toggleContent('${item.id}')" class="text-xs text-emerald-500 hover:text-emerald-700">展开全文 ↓</button>
+            ${commentBtn}
+          </div>
+          <div id="full-${item.id}" class="hidden px-4 pb-4 text-sm text-gray-700 leading-7 border-t border-gray-50">${sanitizeHtml(item.content)}</div>
+          ${commentBlock}
+          <div id="edit-bank-${item.id}" class="hidden border-t border-gray-100 p-4 bg-gray-50 space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-xs text-gray-500 mb-1 block">类型</label>
+                <input id="edit-type-${item.id}" type="text" value="${escHtml(item.type)}"
+                  class="w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+              </div>
+              <div>
+                <label class="text-xs text-gray-500 mb-1 block">标题</label>
+                <input id="edit-title-${item.id}" type="text" value="${escHtml(item.title)}"
+                  class="w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 mb-1 block">正文</label>
+              <textarea id="edit-content-${item.id}" rows="6"
+                class="w-full text-sm font-mono border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white resize-y">${escHtml(item.content)}</textarea>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 mb-1 block">点评（可选）</label>
+              <textarea id="edit-comment-${item.id}" rows="3"
+                class="w-full text-sm font-mono border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white resize-y">${escHtml(item.comment || '')}</textarea>
+            </div>
+            <div class="flex gap-2 justify-end">
+              <button onclick="cancelBankEdit('${item.id}')"
+                class="text-xs text-gray-500 border border-gray-200 hover:border-gray-400 px-4 py-1.5 rounded-lg transition-colors">取消</button>
+              <button onclick="saveBankEdit('${item.id}')"
+                class="text-xs text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-1.5 rounded-lg font-medium transition-colors">保存修改</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function toggleContent(id) {
+      const el  = document.getElementById(`full-${id}`);
+      const btn = document.getElementById(`btn-exp-${id}`);
+      el.classList.toggle('hidden');
+      if (btn) btn.textContent = el.classList.contains('hidden') ? '展开全文 ↓' : '收起 ↑';
+    }
+
+    function toggleComment(id) {
+      const el  = document.getElementById(`comment-${id}`);
+      const btn = document.getElementById(`btn-comment-${id}`);
+      el.classList.toggle('hidden');
+      if (btn) btn.textContent = el.classList.contains('hidden') ? '查看点评' : '收起点评';
+    }
+
+    function filterType(type) {
+      activeType = type;
+      renderBank();
+    }
+
+    function deleteItem(id) {
+      const bank = loadBank().filter(e => e.id !== id);
+      saveBank(bank);
+      renderBank();
+    }
+
+    function clearBank() {
+      if (!confirm('确定清空所有素材？此操作不可撤销。')) return;
+      saveBank([]);
+      selectionMode = false;
+      selectedIds.clear();
+      renderBank();
+    }
+
+    function toggleSelectionMode() {
+      selectionMode = !selectionMode;
+      selectedIds.clear();
+      const btn = document.getElementById('btn-select-mode');
+      const bar = document.getElementById('select-bar');
+      btn.textContent = selectionMode ? '取消' : '多选';
+      btn.className = selectionMode
+        ? 'text-xs text-emerald-600 border border-emerald-400 bg-emerald-50 px-3 py-1 rounded-full transition-colors font-medium'
+        : 'text-xs text-gray-500 border border-gray-200 hover:border-gray-400 px-3 py-1 rounded-full transition-colors';
+      bar.classList.toggle('hidden', !selectionMode);
+      renderBank();
+    }
+
+    function toggleSelect(id) {
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      updateSelectBar();
+      // 只刷新该卡片，避免重渲染整个列表
+      const bank = loadBank();
+      const item = bank.find(e => e.id === id);
+      if (item) {
+        const card = document.getElementById(`card-${id}`);
+        if (card) card.outerHTML = bankCard(item);
+      }
+    }
+
+    function updateSelectBar() {
+      const n = selectedIds.size;
+      document.getElementById('select-count').textContent = `已选 ${n} 项`;
+      const btnAll = document.getElementById('btn-select-all');
+      const filtered = getFiltered();
+      btnAll.textContent = selectedIds.size === filtered.length && filtered.length > 0 ? '取消全选' : '全选';
+    }
+
+    function getFiltered() {
+      const bank = loadBank();
+      return activeType === 'all' ? bank : bank.filter(e => e.type === activeType);
+    }
+
+    function toggleSelectAll() {
+      const filtered = getFiltered();
+      if (selectedIds.size === filtered.length) {
+        selectedIds.clear();
+      } else {
+        filtered.forEach(e => selectedIds.add(e.id));
+      }
+      updateSelectBar();
+      renderBank();
+    }
+
+    function deleteSelected() {
+      if (!selectedIds.size) return;
+      if (!confirm(`确定删除选中的 ${selectedIds.size} 篇素材？`)) return;
+      const bank = loadBank().filter(e => !selectedIds.has(e.id));
+      saveBank(bank);
+      const n = selectedIds.size;
+      selectedIds.clear();
+      selectionMode = false;
+      document.getElementById('btn-select-mode').textContent = '多选';
+      document.getElementById('btn-select-mode').className = 'text-xs text-gray-500 border border-gray-200 hover:border-gray-400 px-3 py-1 rounded-full transition-colors';
+      document.getElementById('select-bar').classList.add('hidden');
+      renderBank();
+      showToast(`已删除 ${n} 篇，素材库共 ${bank.length} 篇`);
+    }
+
+    // ——— Toast ———
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.style.opacity = '1';
+      setTimeout(() => el.style.opacity = '0', 2500);
+    }
+
+    // ——— 工具 ———
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // 允许格式标签（u/b/i/mark/br/strong/em/span），过滤脚本和事件属性
+    function sanitizeHtml(s) {
+      return String(s)
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '')
+        .replace(/\shref\s*=\s*["']javascript:[^"']*["']/gi, '');
+    }
+
+    // 用于预览截断：去除所有 HTML 标签，避免截断到标签中间导致结构破坏
+    function stripHtml(s) {
+      return String(s).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    // ——— 模块2：素材积累（对话式） ———
+    const DEEPSEEK_MODEL = 'deepseek-v4-flash';
+    const CATEGORIES = ['社会成长类', '社会大爱类', '亲情类', '文化传承类'];
+
+    let chatHistory = [];
+    let currentCard = null;
+    let sessionActive = false;
+
+    const SYSTEM_PROMPT = `你是一位温和、耐心的中学写作素材引导老师，集成在教育工具中。你的任务是通过对话，帮助中学生挖掘高质量作文素材。
+
+每次回复必须是合法的JSON对象，结构如下：
+{
+  "message": "对孩子说的话（展示给孩子的对话文字）",
+  "material_card": {
+    "event_name": "事件名称（可为null）",
+    "category": "素材类别",
+    "core_details": ["画面细节1", "画面细节2"],
+    "past_feeling": "当时的感受（可为null）",
+    "present_reflection": "现在的感悟（可为null）",
+    "applicable_topics": ["适用主题1", "适用主题2"]
+  },
+  "session_state": { "is_complete": false }
+}
+
+四步引导流程：
+①打开记忆大门：请孩子描述一个具体事件
+②聚焦画面：追问视觉、听觉、触觉等感官细节
+③从当时到现在：对比当时感受和现在的理解
+④命名与归类：给事件起个名字，确认适用主题
+
+完成所有字段（core_details至少2条、past_feeling、present_reflection、applicable_topics至少2条）后，将is_complete设为true。
+每次只问1-2个问题，语气轻松，像朋友聊天。不评判孩子的回答。`;
+
+    function initAccumTab() {
+      updateApiKeyStatus();
+      renderCategoryBtns();
+    }
+
+    function updateApiKeyStatus() {
+      const key = localStorage.getItem(API_KEY_STORAGE);
+      const btn = document.getElementById('api-key-status-btn');
+      if (btn) btn.textContent = key ? '🔑 已设置' : '⚙ API Key';
+    }
+
+    function toggleApiSettings() {
+      const panel = document.getElementById('api-settings-panel');
+      const isHidden = panel.classList.toggle('hidden');
+      if (!isHidden) {
+        document.getElementById('api-key-input').value = localStorage.getItem(API_KEY_STORAGE) || '';
+      }
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('api-key-input').value.trim();
+      if (!key) { showToast('请输入 API Key'); return; }
+      localStorage.setItem(API_KEY_STORAGE, key);
+      document.getElementById('api-settings-panel').classList.add('hidden');
+      updateApiKeyStatus();
+      showToast('API Key 已保存');
+    }
+
+    function renderCategoryBtns() {
+      const el = document.getElementById('category-btns');
+      if (!el) return;
+      el.innerHTML = CATEGORIES.map(c => `
+        <button onclick="startSession('${c}')" data-cat="${c}"
+          class="cat-btn text-sm px-4 py-1.5 rounded-full border transition-colors text-gray-500 border-gray-200 hover:border-emerald-400">
+          ${c}
+        </button>`).join('');
+    }
+
+    async function startSession(category) {
+      const apiKey = localStorage.getItem(API_KEY_STORAGE);
+      if (!apiKey) {
+        showToast('请先设置 DeepSeek API Key');
+        document.getElementById('api-settings-panel').classList.remove('hidden');
+        return;
+      }
+      chatHistory = [];
+      currentCard = null;
+      sessionActive = true;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        const active = btn.dataset.cat === category;
+        btn.className = `cat-btn text-sm px-4 py-1.5 rounded-full border transition-colors ${
+          active ? 'bg-emerald-600 text-white border-emerald-600' : 'text-gray-500 border-gray-200 hover:border-emerald-400'}`;
+      });
+      document.getElementById('chat-messages').innerHTML = '';
+      document.getElementById('btn-save-card').disabled = true;
+      document.getElementById('material-card-panel').classList.add('hidden');
+      setInputEnabled(false);
+      chatHistory.push({ role: 'user', content: `我想积累【${category}】相关的写作素材，请开始引导我。` });
+      addLoadingBubble();
+      await callDeepSeekChat(apiKey);
+    }
+
+    function setInputEnabled(enabled) {
+      document.getElementById('chat-input').disabled = !enabled;
+      document.getElementById('btn-send').disabled = !enabled;
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text || !sessionActive) return;
+      const apiKey = localStorage.getItem(API_KEY_STORAGE);
+      if (!apiKey) { showToast('请先设置 API Key'); return; }
+      chatHistory.push({ role: 'user', content: text });
+      input.value = '';
+      renderChatMessages();
+      setInputEnabled(false);
+      addLoadingBubble();
+      await callDeepSeekChat(apiKey);
+    }
+
+    async function callDeepSeekChat(apiKey) {
+      try {
+        const resp = await fetch('https://api.deepseek.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          body: JSON.stringify({
+            model: DEEPSEEK_MODEL,
+            messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...chatHistory],
+            temperature: 0.7,
+            max_tokens: 800,
+            response_format: { type: 'json_object' }
+          })
+        });
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err.error?.message || `HTTP ${resp.status}`);
+        }
+        const data = await resp.json();
+        const raw = data.choices?.[0]?.message?.content || '{}';
+        const parsed = JSON.parse(raw);
+        chatHistory.push({ role: 'assistant', content: raw });
+        currentCard = parsed.material_card || null;
+        removeLoadingBubble();
+        renderChatMessages();
+        if (currentCard) {
+          renderMaterialCard(currentCard);
+          document.getElementById('material-card-panel').classList.remove('hidden');
+        }
+        const isComplete = parsed.session_state?.is_complete;
+        document.getElementById('btn-save-card').disabled = !isComplete;
+        setInputEnabled(!isComplete);
+      } catch (e) {
+        removeLoadingBubble();
+        showToast('AI 回复失败：' + e.message);
+        setInputEnabled(true);
+      }
+    }
+
+    function renderChatMessages() {
+      const el = document.getElementById('chat-messages');
+      el.innerHTML = chatHistory.map(msg => {
+        if (msg.role === 'user') {
+          return `<div class="flex justify-end"><div class="max-w-xs bg-emerald-600 text-white text-sm px-4 py-2.5 rounded-2xl rounded-tr-sm leading-6">${escHtml(msg.content)}</div></div>`;
+        }
+        let text = msg.content;
+        try { text = JSON.parse(msg.content).message || msg.content; } catch {}
+        return `<div class="flex justify-start"><div class="max-w-xs bg-white border border-gray-100 text-gray-700 text-sm px-4 py-2.5 rounded-2xl rounded-tl-sm leading-6 shadow-sm">${escHtml(text)}</div></div>`;
+      }).join('');
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function addLoadingBubble() {
+      const el = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.id = 'loading-bubble';
+      div.className = 'flex justify-start';
+      div.innerHTML = `<div class="bg-white border border-gray-100 text-gray-400 text-sm px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm">
+        <span class="inline-flex gap-1 items-center">
+          <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0ms"></span>
+          <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:150ms"></span>
+          <span class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+        </span>
+      </div>`;
+      el.appendChild(div);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function removeLoadingBubble() {
+      document.getElementById('loading-bubble')?.remove();
+    }
+
+    function renderMaterialCard(card) {
+      function setField(rowId, valId, val) {
+        const row = document.getElementById(rowId);
+        const valEl = document.getElementById(valId);
+        const hasVal = Array.isArray(val) ? val.length > 0 : !!val;
+        if (hasVal) {
+          row.classList.remove('hidden');
+          valEl.textContent = Array.isArray(val) ? val.join('；') : val;
+        }
+      }
+      setField('pcard-category', 'pcard-category-val', card.category);
+      setField('pcard-event', 'pcard-event-val', card.event_name);
+      setField('pcard-details', 'pcard-details-val', card.core_details);
+      setField('pcard-feeling', 'pcard-feeling-val', card.past_feeling);
+      setField('pcard-reflection', 'pcard-reflection-val', card.present_reflection);
+      const topics = card.applicable_topics;
+      if (topics?.length) {
+        document.getElementById('pcard-topics').classList.remove('hidden');
+        document.getElementById('pcard-topics-val').innerHTML = topics.map(t =>
+          `<span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">${escHtml(t)}</span>`
+        ).join(' ');
+      }
+    }
+
+    function saveMaterialCard() {
+      if (!currentCard) return;
+      const item = {
+        id: newId(),
+        createdAt: new Date().toISOString(),
+        category: currentCard.category || '',
+        event_name: currentCard.event_name || '',
+        core_details: currentCard.core_details || [],
+        past_feeling: currentCard.past_feeling || '',
+        present_reflection: currentCard.present_reflection || '',
+        applicable_topics: currentCard.applicable_topics || []
+      };
+      const bank = loadPersonalBank();
+      bank.push(item);
+      savePersonalBank(bank);
+      showToast('素材卡已保存到个人素材库！');
+      resetSession();
+    }
+
+    function resetSession() {
+      chatHistory = [];
+      currentCard = null;
+      sessionActive = false;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.className = 'cat-btn text-sm px-4 py-1.5 rounded-full border transition-colors text-gray-500 border-gray-200 hover:border-emerald-400';
+      });
+      document.getElementById('chat-messages').innerHTML =
+        '<div class="text-center text-xs text-gray-300 py-10">选择上方素材类型，开始与 AI 对话积累素材</div>';
+      setInputEnabled(false);
+      document.getElementById('btn-save-card').disabled = true;
+      document.getElementById('material-card-panel').classList.add('hidden');
+      ['pcard-category','pcard-event','pcard-details','pcard-feeling','pcard-reflection','pcard-topics'].forEach(id => {
+        document.getElementById(id)?.classList.add('hidden');
+      });
+    }
+
+    // ——— 个人素材库 ———
+    const PERSONAL_KEY = 'sprint60_personal_v1';
+
+    function loadPersonalStore() {
+      try {
+        const raw = localStorage.getItem(PERSONAL_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch {}
+      return { version: 1, updatedAt: null, items: [] };
+    }
+
+    function savePersonalStore(store) {
+      store.updatedAt = new Date().toISOString();
+      localStorage.setItem(PERSONAL_KEY, JSON.stringify(store));
+    }
+
+    function loadPersonalBank() { return loadPersonalStore().items; }
+
+    function savePersonalBank(items) {
+      const store = loadPersonalStore();
+      store.items = items;
+      savePersonalStore(store);
+    }
+
+    let personalActiveType = 'all';
+
+    function renderPersonalBank() {
+      const bank = loadPersonalBank();
+      document.getElementById('personal-count').textContent = `共 ${bank.length} 张`;
+      const types = ['all', ...new Set(bank.map(e => e.category))];
+      document.getElementById('personal-type-filter').innerHTML = types.map(t => `
+        <button onclick="filterPersonalType('${escHtml(t)}')" data-type="${escHtml(t)}"
+          class="text-xs px-3 py-1 rounded-full border transition-colors ${personalActiveType === t ? 'bg-emerald-600 text-white border-emerald-600' : 'text-gray-500 border-gray-200 hover:border-emerald-400'}">
+          ${t === 'all' ? '全部' : escHtml(t)}
+        </button>`).join('');
+      const filtered = personalActiveType === 'all' ? bank : bank.filter(e => e.category === personalActiveType);
+      const listEl = document.getElementById('personal-list');
+      const emptyEl = document.getElementById('personal-empty');
+      if (!filtered.length) { listEl.innerHTML = ''; emptyEl.classList.remove('hidden'); return; }
+      emptyEl.classList.add('hidden');
+      listEl.innerHTML = filtered.map(item => personalCard(item)).join('');
+    }
+
+    function personalCard(item) {
+      const details = item.core_details?.length ? escHtml(item.core_details.join('；')) : '';
+      const topics = item.applicable_topics || [];
+      return `
+        <div class="bg-white border border-gray-100 rounded-xl p-4 card-enter">
+          <div class="flex items-start gap-2 mb-2">
+            <span class="text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full shrink-0">${escHtml(item.category)}</span>
+            <span class="text-sm font-semibold text-gray-800 flex-1">${escHtml(item.event_name)}</span>
+            <button onclick="deletePersonalItem('${item.id}')" class="text-gray-300 hover:text-red-400 text-xs shrink-0 ml-1">✕</button>
+          </div>
+          ${details ? `<div class="text-xs text-gray-500 leading-5 mb-1"><span class="font-medium text-gray-600">细节：</span>${details}</div>` : ''}
+          ${item.past_feeling ? `<div class="text-xs text-gray-500 leading-5 mb-1"><span class="font-medium text-gray-600">感受：</span>${escHtml(item.past_feeling)}</div>` : ''}
+          ${item.present_reflection ? `<div class="text-xs text-gray-500 leading-5 mb-2"><span class="font-medium text-gray-600">感悟：</span>${escHtml(item.present_reflection)}</div>` : ''}
+          ${topics.length ? `<div class="flex flex-wrap gap-1">${topics.map(t => `<span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">${escHtml(t)}</span>`).join('')}</div>` : ''}
+        </div>`;
+    }
+
+    function filterPersonalType(type) {
+      personalActiveType = type;
+      renderPersonalBank();
+    }
+
+    function deletePersonalItem(id) {
+      const bank = loadPersonalBank().filter(e => e.id !== id);
+      savePersonalBank(bank);
+      renderPersonalBank();
+    }
+
+    function clearPersonalBank() {
+      if (!confirm('确定清空所有个人素材卡？此操作不可撤销。')) return;
+      savePersonalBank([]);
+      personalActiveType = 'all';
+      renderPersonalBank();
+    }
+
+    document.getElementById('chat-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+    });
+
+    // ——— 初始化导航 ———
+    showSection('essays');
+
+    // ——— 模块5：套题技巧 ———
+    const CLOZE_KEY = 'sprint60_cloze_v1';
+
+    function loadClozeStore() {
+      try { const r = localStorage.getItem(CLOZE_KEY); if (r) return JSON.parse(r); } catch {}
+      return { version: 1, updatedAt: null, items: [] };
+    }
+    function saveClozeStore(store) { store.updatedAt = new Date().toISOString(); localStorage.setItem(CLOZE_KEY, JSON.stringify(store)); }
+    function loadClozeBank() { return loadClozeStore().items; }
+    function saveClozeBank(items) { const s = loadClozeStore(); s.items = items; saveClozeStore(s); }
+
+    function parseClozeEssay(side) {
+      const raw = document.getElementById(`cloze-${side}-input`).value.trim();
+      if (!raw) return null;
+      let parsed;
+      try { parsed = JSON.parse(raw); } catch { try { parsed = JSON.parse(repairJSON(raw)); } catch { return null; } }
+      const item = Array.isArray(parsed) ? parsed[0] : parsed;
+      if (!item || !item.title || !item.content) return null;
+      const preview = document.getElementById(`cloze-${side}-preview`);
+      const commentNote = item.comment ? '（含点评）' : '';
+      preview.textContent = `《${item.title}》${item.content.length} 字${commentNote}`;
+      preview.classList.remove('hidden');
+      return { title: String(item.title), content: String(item.content), comment: item.comment ? String(item.comment) : '' };
+    }
+
+    function saveClozeExample() {
+      const errEl = document.getElementById('cloze-import-error');
+      const stock = parseClozeEssay('stock');
+      const exam  = parseClozeEssay('exam');
+      if (!stock) { errEl.textContent = '库存作文格式有误（需包含 title 和 content 字段）'; errEl.classList.remove('hidden'); return; }
+      if (!exam)  { errEl.textContent = '考场作文格式有误（需包含 title 和 content 字段）'; errEl.classList.remove('hidden'); return; }
+      errEl.classList.add('hidden');
+      const bank = loadClozeBank();
+      bank.push({ id: newId(), createdAt: new Date().toISOString(), stock, exam });
+      saveClozeBank(bank);
+      clearClozeImport();
+      showToast(`范例 ${bank.length} 已保存！`);
+      showContent('cloze-bank');
+    }
+
+    function clearClozeImport() {
+      ['stock', 'exam'].forEach(side => {
+        document.getElementById(`cloze-${side}-input`).value = '';
+        const p = document.getElementById(`cloze-${side}-preview`);
+        p.textContent = ''; p.classList.add('hidden');
+      });
+      document.getElementById('cloze-import-error').classList.add('hidden');
+    }
+
+    function renderClozeBank() {
+      const bank = loadClozeBank();
+      document.getElementById('cloze-bank-count').textContent = `共 ${bank.length} 个范例`;
+      const listEl  = document.getElementById('cloze-bank-list');
+      const emptyEl = document.getElementById('cloze-bank-empty');
+      if (!bank.length) { listEl.innerHTML = ''; emptyEl.classList.remove('hidden'); return; }
+      emptyEl.classList.add('hidden');
+      listEl.innerHTML = bank.map((item, i) => clozeCard(item, i + 1)).join('');
+    }
+
+    function clozeCard(item, n) {
+      function half(side, label, colorBg, colorText, fullId) {
+        const _p = stripHtml(item[side].content);
+        const preview = escHtml(_p.length > 150 ? _p.slice(0, 150) + '…' : _p);
+        const cmt = item[side].comment || '';
+        const commentHtml = cmt
+          ? `<div class="mt-3 pt-3 border-t border-amber-100 text-xs text-amber-700 leading-5"><span class="font-medium text-amber-500 block mb-1">点评</span>${sanitizeHtml(cmt)}</div>`
+          : '';
+        return `
+          <div class="p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-bold ${colorBg} text-white px-2 py-0.5 rounded-full shrink-0">${label}</span>
+              <span class="text-sm font-semibold text-gray-800 truncate">${escHtml(item[side].title)}</span>
+            </div>
+            <p class="text-xs text-gray-500 leading-5 mb-2">${preview}</p>
+            <button onclick="toggleClozeContent('${fullId}')" class="text-xs ${colorText} mt-0.5">展开全文 ↓</button>
+            <div id="${fullId}" class="hidden mt-2 text-xs text-gray-700 leading-6">${sanitizeHtml(item[side].content)}${commentHtml}</div>
+          </div>`;
+      }
+      return `
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden card-enter">
+          <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+            <span class="text-sm font-semibold text-gray-700">范例 ${n}</span>
+            <div class="flex gap-3">
+              <button onclick="editClozeItem('${item.id}')" class="text-gray-300 hover:text-blue-400 text-xs transition-colors">编辑</button>
+              <button onclick="deleteClozeItem('${item.id}')" class="text-gray-300 hover:text-red-400 text-xs transition-colors">✕</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+            ${half('stock', '库存作文', 'bg-blue-600', 'text-blue-500 hover:text-blue-700', `cloze-full-stock-${item.id}`)}
+            ${half('exam',  '考场作文', 'bg-amber-500', 'text-amber-500 hover:text-amber-700', `cloze-full-exam-${item.id}`)}
+          </div>
+          <div id="edit-cloze-${item.id}" class="hidden border-t border-gray-100 p-4 bg-gray-50 space-y-4">
+            <div>
+              <div class="text-xs font-semibold text-blue-600 mb-2">库存作文</div>
+              <div class="space-y-2">
+                <input id="edit-cloze-stock-title-${item.id}" type="text" value="${escHtml(item.stock.title)}" placeholder="标题"
+                  class="w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
+                <textarea id="edit-cloze-stock-content-${item.id}" rows="5"
+                  class="w-full text-sm font-mono border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white resize-y">${escHtml(item.stock.content)}</textarea>
+                <textarea id="edit-cloze-stock-comment-${item.id}" rows="2" placeholder="点评（可选）"
+                  class="w-full text-sm font-mono border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white resize-y">${escHtml(item.stock.comment || '')}</textarea>
+              </div>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-amber-600 mb-2">考场作文</div>
+              <div class="space-y-2">
+                <input id="edit-cloze-exam-title-${item.id}" type="text" value="${escHtml(item.exam.title)}" placeholder="标题"
+                  class="w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
+                <textarea id="edit-cloze-exam-content-${item.id}" rows="5"
+                  class="w-full text-sm font-mono border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white resize-y">${escHtml(item.exam.content)}</textarea>
+                <textarea id="edit-cloze-exam-comment-${item.id}" rows="2" placeholder="点评（可选）"
+                  class="w-full text-sm font-mono border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white resize-y">${escHtml(item.exam.comment || '')}</textarea>
+              </div>
+            </div>
+            <div class="flex gap-2 justify-end">
+              <button onclick="cancelClozeEdit('${item.id}')"
+                class="text-xs text-gray-500 border border-gray-200 hover:border-gray-400 px-4 py-1.5 rounded-lg transition-colors">取消</button>
+              <button onclick="saveClozeEdit('${item.id}')"
+                class="text-xs text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-1.5 rounded-lg font-medium transition-colors">保存修改</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function toggleClozeContent(fullId) {
+      const el = document.getElementById(fullId);
+      const btn = el.previousElementSibling;
+      el.classList.toggle('hidden');
+      btn.textContent = el.classList.contains('hidden') ? '展开全文 ↓' : '收起 ↑';
+    }
+
+    function deleteClozeItem(id) {
+      saveClozeBank(loadClozeBank().filter(e => e.id !== id));
+      renderClozeBank();
+    }
+
+    function clearClozeBank() {
+      if (!confirm('确定清空所有套题范例？此操作不可撤销。')) return;
+      saveClozeBank([]);
+      renderClozeBank();
+    }
+
+    // ——— 格局提升 ———
+    const PATTERN_DATA = [
+      { n:1,  title:'爱与冷漠——培养博爱的情怀',   cat:'社会我',
+        desc:'「城市温度」是考场作文中能体现「社会大爱」的重要维度。冰心在《再寄小读者》有「博爱的对面就是冷漠」一句，这句话发人深省。我们总是教孩子要懂得自我保护，让他们远离陌生人，然而，这样的担忧却收束起他们原本博爱的情怀。考场作文中，「社会不冷漠」的主题无疑对阅卷人有很大吸引力。',
+        essays:['城市小暖'] },
+      { n:2,  title:'精彩与倦怠——定格校园的生活', cat:'社会我',
+        desc:'家庭生活与校园生活占据了当前初中学生绝大多数的时间，因此也构成了考场作文经常出现的命题方向，如「黑板上的记忆」「良师」「课后」「这堂课真______」等。在未明确要求写校园题材的命题中，选择校园题材也十分明智，但尤其需要注意：原则上，不鼓励写考试失败，可以写丰富多彩的校园生活，体现学生积极向上、充满活力的一面。',
+        essays:['人间四月天'] },
+      { n:3,  title:'栖居与漂泊——安顿心灵的自我', cat:'社会我',
+        desc:'学生成长过程中，都会有伴随家人去异地旅行的经历。置身于山清水秀的陌生环境中，人的心灵会得到荡涤。同样，异地遇到的人和事一定是新奇的，一个牧羊人，一个手工艺人，一个船夫，一个说书人，都会成为故事的源头。两个年龄相仿的个人不同的生活状态对比，你的心灵是否会得到冲击？',
+        essays:['风景在路上'] },
+      { n:4,  title:'回眸与前瞻——审视发展的路径', cat:'社会我',
+        desc:'在新中国成立70周年的当前，我们不妨回眸过去，审视未来。诚然，当前的中国依旧存在各种各样的社会问题：贸易问题、统一问题、人权问题、和平问题、环保问题……大时代背景下，内地与香港、大陆与台湾居民对于和平、安居乐业的向往远胜于任何意识形态的操弄。尝试将它写出来。',
+        essays:['花开倾城','"和"为本','太平洋的风'] },
+      { n:5,  title:'自卑与超越——提升镜中的自我', cat:'自然我',
+        desc:'「自我提升类」是初中考场作文最常见的写作方向，聚焦一件事，写自己从委屈、愤懑、不甘、沮丧，走向豁达、开朗、平静、喜乐的过程，即从「不明白」走向「明白」，便是提升镜中的自我。',
+        essays:['心里美滋滋的'] },
+      { n:6,  title:'崇高与卑鄙——透视人性的优劣', cat:'自然我',
+        desc:'人性中的「羡慕、嫉妒、恨」，人皆有之。如控制有度，不至让人失去亲朋好友，也不会一路碰的头破血流；如失去控制，那就会众叛亲离，苦海无边。自私其实是人的天性，但现代社会人际交往中，则需要我们收束起这样的天性，让自己更宽容，更豁达。',
+        essays:['天晴了，真好'] },
+      { n:7,  title:'青春与衰老——品味岁月的魅力', cat:'自然我',
+        desc:'常听到一句话：岁月是把杀猪刀。岁月不仅会让人的容颜发生改变，更会渐渐磨去人的棱角，净化心灵。你是否曾与那些陌生的长辈们交流过？那些经历过岁月磨炼的灵魂，那些经历过沧海桑田，可如今却选择云淡风轻、安贫乐道的人，他们的故事，似乎就是一段完整的共和国史。',
+        essays:['这一刻，我才懂得','剪窗花'] },
+      { n:8,  title:'瞬间与永恒——直面生命的两极', cat:'自然我',
+        desc:'生与死，这始终是考场作文中最能引起阅卷人共鸣的主题。曾有人调侃道：当前十篇写爷爷的作文里，八篇最后一段都是去世了。事实上，「去世」不可怕，即使是杜撰出来的「去世」也未尝不可，关键是文中对于生死两极的诠释要融入真情实感。面对生死，才能将人生的「大格局」淋漓展现。',
+        essays:['我终于明白了'] },
+      { n:9,  title:'皈依与颠覆——进行哲理的追问', cat:'文化我',
+        desc:'当面对的作文题是一句充满哲学意味的话时，不妨以追问「……是什么？」的形式开篇。然后用3个小故事或片段来对其内涵进行诠释，末段再以递进式排比句对其意义进行终极定性。这种写作方式颇具新意，容易写出亮点。',
+        essays:['生命的意义'] },
+      { n:10, title:'原型与变异——解剖文学的原型', cat:'文化我',
+        desc:'对于作文成绩拔尖的同学来说，不仅要关注自己身边的人和事，更需要具备对于文学作品的改编、仿写、再塑能力，这就是我们常说的「奇文」。所谓「奇文」是指在不违背中考要求的前提下，用创新性手法写作。在众多作文竞赛中，这类写法获奖几率更大。',
+        essays:['面对大海','心里美滋滋的2'] },
+      { n:11, title:'壮美与优美——感悟美学的真谛', cat:'文化我',
+        desc:'康德认为人心的构造是相似的，所以美的判断，是主观而又普遍的；黑格尔认为美是在个别事物上，见出「概念」或理想。朱光潜又说：美是物与心的融合。有的学生的作文极具美感，关键是找到了生活中「美的元素」，比如旗袍是一种妩媚的东方美，刺绣是一种物我和一的隽美，古琴是一种高山流水谢知音的唯美。',
+        essays:['没错，我很喜欢'] },
+      { n:12, title:'实证与创新——理解科学的精神', cat:'文化我',
+        desc:'初中作文时常需要学生聚焦课堂里发生的事，关注「科学」更能体现学生博采众长、均衡发展的特点。以一节物理实验课作为立足点，结合学生、老师丰富的肢体动作与心理变化，让课堂变得更生动。无论中心主旨是赞美老师还是歌颂青春，这样的文章都富有感染力。',
+        essays:['这堂课真有趣'] }
+    ];
+
+    const PATTERN_CAT_STYLE = {
+      '社会我': { badge: 'bg-blue-100 text-blue-700',  num: 'bg-blue-100 text-blue-700' },
+      '自然我': { badge: 'bg-emerald-100 text-emerald-700', num: 'bg-emerald-100 text-emerald-700' },
+      '文化我': { badge: 'bg-purple-100 text-purple-700', num: 'bg-purple-100 text-purple-700' }
+    };
+
+    function renderPatternGuide() {
+      document.getElementById('pattern-guide-list').innerHTML = PATTERN_DATA.map(item => {
+        const s = PATTERN_CAT_STYLE[item.cat];
+        const links = item.essays.map(t =>
+          `<button onclick="showEssayByTitle('${t.replace(/'/g,"\\'")}')
+            " class="text-xs font-medium text-emerald-600 hover:text-emerald-800 hover:underline">《${escHtml(t)}》</button>`
+        ).join('<span class="text-gray-300 mx-1">·</span>');
+        return `
+          <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+            <button onclick="togglePatternItem(${item.n})" class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+              <span class="w-7 h-7 rounded-full ${s.num} text-xs font-bold flex items-center justify-center shrink-0">${item.n}</span>
+              <span class="text-sm font-semibold text-gray-800 flex-1">${escHtml(item.title)}</span>
+              <span class="text-xs ${s.badge} px-2 py-0.5 rounded-full shrink-0 hidden sm:inline">${item.cat}</span>
+              <svg id="pg-icon-${item.n}" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none">
+                <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div id="pg-body-${item.n}" class="hidden border-t border-gray-50 px-5 pb-5">
+              <p class="text-sm text-gray-600 leading-7 mt-4 mb-3">${escHtml(item.desc)}</p>
+              <div class="flex items-center gap-1 flex-wrap">
+                <span class="text-xs text-gray-400 mr-1">范例：</span>${links}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function togglePatternItem(n) {
+      const body = document.getElementById(`pg-body-${n}`);
+      const icon = document.getElementById(`pg-icon-${n}`);
+      const nowHidden = body.classList.toggle('hidden');
+      icon.style.transform = nowHidden ? '' : 'rotate(180deg)';
+    }
+
+    function showEssayByTitle(title) {
+      const bank = loadBank();
+      const item = bank.find(e => e.title === title);
+      if (!item) { showToast(`未找到《${title}》，请先导入该作文`); return; }
+      activeType = 'all';
+      activeSection = 'essays';
+      showContent('essays-bank');
+      setTimeout(() => {
+        const card = document.getElementById(`card-${item.id}`);
+        if (!card) return;
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.style.transition = 'box-shadow 0.3s';
+        card.style.boxShadow = '0 0 0 3px #10b981';
+        setTimeout(() => { card.style.boxShadow = ''; }, 2200);
+        const full = document.getElementById(`full-${item.id}`);
+        if (full && full.classList.contains('hidden')) {
+          full.classList.remove('hidden');
+          const btn = document.getElementById(`btn-exp-${item.id}`);
+          if (btn) btn.textContent = '收起 ↑';
+        }
+      }, 180);
+    }
+
+    // ——— 描写技法：范文选择 ———
+    const TECHNIQUE_IDS_KEY = 'sprint60_technique_ids';
+
+    function loadTechniqueIds() {
+      try { return JSON.parse(localStorage.getItem(TECHNIQUE_IDS_KEY)) || []; } catch { return []; }
+    }
+    function saveTechniqueIds(ids) {
+      localStorage.setItem(TECHNIQUE_IDS_KEY, JSON.stringify(ids));
+    }
+    function toggleTechniqueId(id) {
+      const ids = loadTechniqueIds();
+      const idx = ids.indexOf(id);
+      if (idx === -1) ids.push(id); else ids.splice(idx, 1);
+      saveTechniqueIds(ids);
+    }
+    function removeTechniqueItem(id) {
+      toggleTechniqueId(id);
+      renderTechniqueBank();
+      showToast('已从技法库移除');
+    }
+
+    function renderTechniqueImport() {
+      const bank = loadBank();
+      const selectedSet = new Set(loadTechniqueIds());
+      document.getElementById('technique-import-count').textContent = `已选 ${selectedSet.size} / ${bank.length} 篇`;
+      const listEl  = document.getElementById('technique-import-list');
+      const emptyEl = document.getElementById('technique-import-empty');
+      if (!bank.length) { listEl.innerHTML = ''; emptyEl.classList.remove('hidden'); return; }
+      emptyEl.classList.add('hidden');
+      listEl.innerHTML = bank.map(item => {
+        const sel = selectedSet.has(item.id);
+        const preview = escHtml(stripHtml(item.content).slice(0, 80)) + (item.content.length > 80 ? '…' : '');
+        return `
+          <div onclick="toggleTechniqueId('${item.id}'); renderTechniqueImport();"
+            class="bg-white border rounded-xl p-4 card-enter flex gap-3 items-start cursor-pointer transition-colors ${sel ? 'border-emerald-400 bg-emerald-50' : 'border-gray-100 hover:border-emerald-200'}">
+            <div class="shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center mt-0.5 transition-colors ${sel ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300'}">
+              ${sel ? '<svg class="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full shrink-0">${escHtml(item.type)}</span>
+                <span class="text-sm font-semibold text-gray-800 truncate">${escHtml(item.title)}</span>
+              </div>
+              <p class="text-xs text-gray-400 leading-5">${preview}</p>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function renderTechniqueBank() {
+      const bank = loadBank();
+      const ids = loadTechniqueIds();
+      const selected = bank.filter(e => ids.includes(e.id));
+      document.getElementById('technique-bank-count').textContent = `共 ${selected.length} 篇`;
+      const listEl  = document.getElementById('technique-bank-list');
+      const emptyEl = document.getElementById('technique-bank-empty');
+      if (!selected.length) { listEl.innerHTML = ''; emptyEl.classList.remove('hidden'); return; }
+      emptyEl.classList.add('hidden');
+      listEl.innerHTML = selected.map(item => techniqueBankCard(item)).join('');
+    }
+
+    function techniqueBankCard(item) {
+      const preview = escHtml(stripHtml(item.content).slice(0, 80)) + (item.content.length > 80 ? '…' : '');
+      const commentBlock = item.comment
+        ? `<div id="tcmt-${item.id}" class="hidden px-4 pb-4 text-sm text-amber-700 leading-7 bg-amber-50 border-t border-amber-100"><span class="font-medium text-amber-500 text-xs block mb-1">点评</span>${sanitizeHtml(item.comment)}</div>`
+        : '';
+      const commentBtn = item.comment
+        ? `<button id="tbtn-cmt-${item.id}" onclick="toggleTechComment('${item.id}')" class="text-xs text-amber-500 hover:text-amber-700 ml-3">查看点评</button>`
+        : '';
+      return `
+        <div class="bg-white border border-gray-100 rounded-xl overflow-hidden card-enter">
+          <div class="p-4">
+            <div class="flex items-start gap-2 mb-1">
+              <span class="text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full shrink-0">${escHtml(item.type)}</span>
+              <span class="text-sm font-semibold text-gray-800 flex-1">${escHtml(item.title)}</span>
+              <button onclick="removeTechniqueItem('${item.id}')" class="text-gray-300 hover:text-orange-400 text-xs shrink-0 ml-1 transition-colors">移除</button>
+            </div>
+            <p class="text-xs text-gray-400 leading-5 mt-2">${preview}</p>
+          </div>
+          <div class="border-t border-gray-50 px-4 py-2 flex items-center">
+            <button id="tbtn-exp-${item.id}" onclick="toggleTechContent('${item.id}')" class="text-xs text-emerald-500 hover:text-emerald-700">展开全文 ↓</button>
+            ${commentBtn}
+          </div>
+          <div id="tech-full-${item.id}" class="hidden px-4 pb-4 text-sm text-gray-700 leading-7 border-t border-gray-50">${sanitizeHtml(item.content)}</div>
+          ${commentBlock}
+        </div>`;
+    }
+
+    function toggleTechContent(id) {
+      const el  = document.getElementById(`tech-full-${id}`);
+      const btn = document.getElementById(`tbtn-exp-${id}`);
+      el.classList.toggle('hidden');
+      if (btn) btn.textContent = el.classList.contains('hidden') ? '展开全文 ↓' : '收起 ↑';
+    }
+    function toggleTechComment(id) {
+      const el  = document.getElementById(`tcmt-${id}`);
+      const btn = document.getElementById(`tbtn-cmt-${id}`);
+      el.classList.toggle('hidden');
+      if (btn) btn.textContent = el.classList.contains('hidden') ? '查看点评' : '收起点评';
+    }
+
+    // ——— 编辑功能：优秀作文 ———
+    function editBankItem(id) {
+      document.getElementById(`edit-bank-${id}`).classList.toggle('hidden');
+    }
+    function cancelBankEdit(id) {
+      document.getElementById(`edit-bank-${id}`).classList.add('hidden');
+    }
+    function saveBankEdit(id) {
+      const type    = document.getElementById(`edit-type-${id}`).value.trim();
+      const title   = document.getElementById(`edit-title-${id}`).value.trim();
+      const content = document.getElementById(`edit-content-${id}`).value;
+      const comment = document.getElementById(`edit-comment-${id}`).value;
+      if (!type || !title || !content) { showToast('类型、标题、正文不能为空'); return; }
+      const bank = loadBank();
+      const idx  = bank.findIndex(e => e.id === id);
+      if (idx === -1) return;
+      bank[idx] = { ...bank[idx], type, title, content, comment };
+      saveBank(bank);
+      showToast('修改已保存');
+      renderBank();
+    }
+
+    // ——— 编辑功能：套题技巧 ———
+    function editClozeItem(id) {
+      document.getElementById(`edit-cloze-${id}`).classList.toggle('hidden');
+    }
+    function cancelClozeEdit(id) {
+      document.getElementById(`edit-cloze-${id}`).classList.add('hidden');
+    }
+    function saveClozeEdit(id) {
+      const sTitle   = document.getElementById(`edit-cloze-stock-title-${id}`).value.trim();
+      const sContent = document.getElementById(`edit-cloze-stock-content-${id}`).value;
+      const sComment = document.getElementById(`edit-cloze-stock-comment-${id}`).value;
+      const eTitle   = document.getElementById(`edit-cloze-exam-title-${id}`).value.trim();
+      const eContent = document.getElementById(`edit-cloze-exam-content-${id}`).value;
+      const eComment = document.getElementById(`edit-cloze-exam-comment-${id}`).value;
+      if (!sTitle || !sContent || !eTitle || !eContent) { showToast('标题和正文不能为空'); return; }
+      const bank = loadClozeBank();
+      const idx  = bank.findIndex(e => e.id === id);
+      if (idx === -1) return;
+      bank[idx].stock = { title: sTitle, content: sContent, comment: sComment };
+      bank[idx].exam  = { title: eTitle, content: eContent, comment: eComment };
+      saveClozeBank(bank);
+      showToast('修改已保存');
+      renderClozeBank();
+    }
+
+    // ——— 模块3：描写技法 ———
+    function toggleTechnique(n) {
+      const body = document.getElementById(`tech-body-${n}`);
+      const icon = document.getElementById(`tech-icon-${n}`);
+      const nowHidden = body.classList.toggle('hidden');
+      icon.style.transform = nowHidden ? '' : 'rotate(180deg)';
+    }
+  </script>
+</body>
+</html>
