@@ -2,8 +2,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>作文冲刺60</title>
+  <!-- PWA / 全屏 App -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="作文冲刺60">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="mobile-web-app-capable" content="yes">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
@@ -2088,6 +2094,50 @@
       const icon = document.getElementById(`tech-icon-${n}`);
       const nowHidden = body.classList.toggle('hidden');
       icon.style.transform = nowHidden ? '' : 'rotate(180deg)';
+    }
+
+    // ——— PWA manifest 注入（Android Chrome 安装支持） ———
+    (function () {
+      const icon = "data:image/svg+xml," + encodeURIComponent(
+        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'>
+          <rect width='192' height='192' rx='36' fill='#059669'/>
+          <text x='96' y='140' text-anchor='middle' font-family='sans-serif'
+            font-size='90' font-weight='bold' fill='white'>60</text>
+        </svg>`
+      );
+      const manifest = {
+        name: '作文冲刺60',
+        short_name: '冲刺60',
+        start_url: location.href,
+        display: 'standalone',
+        background_color: '#f9fafb',
+        theme_color: '#ffffff',
+        icons: [{ src: icon, sizes: 'any', type: 'image/svg+xml' }]
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = URL.createObjectURL(blob);
+      document.head.appendChild(link);
+    })();
+
+    // ——— Service Worker（离线缓存） ———
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      const swSrc = `
+        const CACHE = 'sprint60-sw-v1';
+        self.addEventListener('install', e => {
+          self.skipWaiting();
+          e.waitUntil(caches.open(CACHE).then(c => c.add(self.location.href)));
+        });
+        self.addEventListener('activate', () => clients.claim());
+        self.addEventListener('fetch', e => {
+          if (e.request.mode === 'navigate') {
+            e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+          }
+        });
+      `;
+      const swBlob = new Blob([swSrc], { type: 'application/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
     }
   </script>
 </body>
