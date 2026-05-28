@@ -19,29 +19,28 @@
       to   { opacity: 1; transform: translateY(0); }
     }
     textarea { resize: vertical; }
+    /* Bottom tab bar safe-area */
+    #bottom-tabs { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    /* Segmented control active pill */
+    .seg-active { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-  <!-- 顶部导航（两行） -->
-  <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
-    <!-- 第一行：Logo + 主模块 -->
-    <div class="max-w-4xl mx-auto px-4 pt-3 pb-2 flex items-center gap-3">
-      <span class="text-xl font-bold text-emerald-600 shrink-0">作文冲刺60</span>
-      <nav id="top-nav" class="flex gap-1 text-sm overflow-x-auto"></nav>
+  <!-- 顶部：页面标题 + 子导航 -->
+  <header class="bg-white border-b border-gray-100 sticky top-0 z-10">
+    <div class="max-w-4xl mx-auto px-4 h-12 flex items-center justify-between">
+      <span class="text-xs text-gray-400 font-medium">作文冲刺60 <span id="app-version-badge" class="text-gray-300"></span></span>
+      <span id="page-title" class="text-base font-bold text-gray-800 absolute left-1/2 -translate-x-1/2"></span>
+      <div id="header-action" class="w-16 flex justify-end"></div>
     </div>
-    <!-- 第二行：个人素材库 + 21天计划（固定）+ 子标签（动态） -->
-    <div class="max-w-4xl mx-auto px-4 pb-2 flex items-center gap-1 text-sm border-t border-gray-100 overflow-x-auto">
-      <button id="nav-personal" onclick="showSection('personal')"
-        class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors">个人素材库</button>
-      <button id="nav-plan" onclick="showSection('plan')"
-        class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors">21天计划</button>
-      <div id="sub-nav-sep" class="hidden w-px h-4 bg-gray-200 mx-1 shrink-0"></div>
-      <div id="sub-nav" class="flex gap-1"></div>
+    <!-- 分段子导航（素材 / 学习 tab 有子项时显示） -->
+    <div id="sub-nav" class="hidden border-t border-gray-100 py-2 px-4 flex justify-center">
+      <div id="sub-nav-inner" class="inline-flex bg-gray-100 rounded-xl p-1 gap-0.5 overflow-x-auto max-w-full"></div>
     </div>
   </header>
 
-  <main class="max-w-4xl mx-auto px-4 py-6">
+  <main class="max-w-4xl mx-auto px-4 py-5" style="padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))">
 
     <!-- 优秀作文 → 导入 -->
     <section id="content-essays-import" class="hidden">
@@ -189,9 +188,14 @@
     <!-- 优秀作文 → 显示 -->
     <section id="content-essays-bank" class="hidden">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-base font-semibold text-gray-800">素材库</h2>
-        <div class="flex gap-2 items-center">
+        <div class="flex items-center gap-2">
           <span id="bank-count" class="text-xs text-gray-400"></span>
+          <button onclick="showContent('essays-import')"
+            class="text-xs text-emerald-600 border border-emerald-200 hover:bg-emerald-50 px-2.5 py-0.5 rounded-full transition-colors">
+            + 导入
+          </button>
+        </div>
+        <div class="flex gap-2 items-center">
           <button id="btn-select-mode" onclick="toggleSelectionMode()"
             class="text-xs text-gray-500 border border-gray-200 hover:border-gray-400 px-3 py-1 rounded-full transition-colors">
             多选
@@ -375,6 +379,19 @@
         </div>
 
       </div>
+
+      <!-- 入口 -->
+      <div class="flex gap-2 mt-4 pb-2">
+        <button onclick="showContent('technique-import')"
+          class="flex-1 text-sm text-amber-600 border border-amber-200 hover:bg-amber-50 py-2.5 rounded-xl transition-colors">
+          选择参考范文
+        </button>
+        <button onclick="showContent('technique-bank')"
+          class="flex-1 text-sm text-white py-2.5 rounded-xl transition-colors"
+          style="background:#d97706">
+          查看参考范文 →
+        </button>
+      </div>
     </section>
 
     <!-- 描写技法 → 导入（从优秀作文库选择） -->
@@ -407,7 +424,7 @@
     <!-- 格局提升 → 主页（格局三角） -->
     <section id="content-pattern-home" class="hidden">
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
-        <p class="text-xs text-gray-500 leading-6">格局三角将作文选材分为三大维度。在「导览」中查看每个格局的详解与范文。</p>
+        <p class="text-xs text-gray-500 leading-6">格局三角将作文选材分为三大维度，点击下方按钮查看每个格局的详解与范文。</p>
       </div>
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 overflow-x-auto">
         <div style="min-width:600px">
@@ -457,6 +474,15 @@
           </svg>
         </div>
       </div>
+
+      <!-- 入口 -->
+      <div class="mt-4 pb-2">
+        <button onclick="showContent('pattern-guide')"
+          class="w-full text-sm text-white py-2.5 rounded-xl transition-colors"
+          style="background:#7c3aed">
+          格局导览（12 大格局详解）→
+        </button>
+      </div>
     </section>
 
     <!-- 格局提升 → 导览 -->
@@ -505,6 +531,19 @@
           <p class="text-sm text-gray-700 leading-7 pt-0.5">让你的<strong class="text-orange-600">标题</strong>成为<strong class="text-orange-600">「全文线索」</strong></p>
         </div>
 
+      </div>
+
+      <!-- 入口 -->
+      <div class="flex gap-2 pb-2">
+        <button onclick="showContent('cloze-import')"
+          class="flex-1 text-sm text-orange-600 border border-orange-200 hover:bg-orange-50 py-2.5 rounded-xl transition-colors">
+          导入对照范文
+        </button>
+        <button onclick="showContent('cloze-bank')"
+          class="flex-1 text-sm text-white py-2.5 rounded-xl transition-colors"
+          style="background:#d97706">
+          查看对照范文 →
+        </button>
       </div>
     </section>
 
@@ -572,13 +611,9 @@
       </div>
     </section>
 
-    <!-- 21天计划（待定） -->
+    <!-- 21天计划 -->
     <section id="content-plan-home" class="hidden">
-      <div class="text-center py-24 text-gray-300">
-        <div class="text-5xl mb-4">📅</div>
-        <div class="text-sm font-medium text-gray-400">21天计划</div>
-        <div class="text-xs mt-1">即将推出</div>
-      </div>
+      <div id="plan-inner"></div>
     </section>
 
     <!-- 设置 -->
@@ -659,7 +694,169 @@
 
     </section>
 
+    <!-- 帮助 / 使用手册 -->
+    <section id="content-help-home" class="hidden pb-4">
+
+      <!-- 简介 -->
+      <div class="bg-cyan-50 border border-cyan-100 rounded-2xl p-4 mb-4">
+        <div class="text-sm font-bold text-cyan-800 mb-1">作文冲刺60 · 使用手册</div>
+        <div class="text-xs text-cyan-700 leading-5">专为中学考场作文设计的备考工具，支持手机与电脑使用，数据本地保存，可同步到多台设备。</div>
+      </div>
+
+      <!-- 目录快跳 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+        <div class="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">目录</div>
+        <div class="grid grid-cols-2 gap-1.5 text-xs">
+          <a href="#help-essays"   class="text-cyan-600 py-1">📚 作文库</a>
+          <a href="#help-personal" class="text-cyan-600 py-1">✍️ 素材积累 &amp; 我的素材库</a>
+          <a href="#help-learn"    class="text-cyan-600 py-1">📖 学习（描写·格局·套题）</a>
+          <a href="#help-settings" class="text-cyan-600 py-1">⚙ 设置（同步 &amp; API）</a>
+          <a href="#help-pwa"      class="text-cyan-600 py-1">📱 安装到手机桌面</a>
+          <a href="#help-data"     class="text-cyan-600 py-1">🔒 数据安全说明</a>
+        </div>
+      </div>
+
+      <!-- ① 作文库 -->
+      <div id="help-essays" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+        <button onclick="toggleHelp('essays')" class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+          <span class="w-8 h-8 rounded-full bg-emerald-600 text-white text-base flex items-center justify-center shrink-0">一</span>
+          <div class="flex-1"><div class="text-sm font-semibold text-gray-800">作文库</div><div class="text-xs text-gray-400 mt-0.5">导入优秀作文 · 筛选浏览 · 批量管理</div></div>
+          <svg id="help-icon-essays" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div id="help-body-essays" class="hidden border-t border-gray-50 px-5 pb-5 text-sm text-gray-600 leading-7">
+          <p class="mt-4 font-semibold text-gray-700">导入优秀作文</p>
+          <p class="text-xs">点底部「作文库」→ 右上角「+ 导入」。将作文整理为 JSON 格式粘贴，字段：</p>
+          <div class="my-2 bg-gray-50 rounded-xl p-3 text-xs font-mono text-gray-500 leading-5">
+            &#123; "type": "亲情", "title": "爷爷的书法",<br>
+            &nbsp;&nbsp;"content": "正文…", "comment": "点评…" &#125;
+          </div>
+          <p class="text-xs"><span class="font-medium text-gray-700">type · title · content</span> 必填，<span class="font-medium text-gray-700">comment</span> 选填。多篇用数组 <code class="bg-gray-100 px-1 rounded">[ ]</code> 包裹。粘贴后点「导入素材」→ 预览 → 「确认入库」。</p>
+          <p class="mt-3 font-semibold text-gray-700">浏览与管理</p>
+          <ul class="text-xs space-y-1 mt-1">
+            <li>• 点顶部类型标签按类型筛选，「全部」恢复全显</li>
+            <li>• 点击卡片展开 / 折叠正文与点评</li>
+            <li>• 右上角「多选」→ 勾选 → 「删除选中」可批量删除</li>
+            <li>• 「全选」按钮可一键全选当前列表</li>
+            <li>• 「清空」删除全部（操作前有确认弹窗）</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ② 素材 -->
+      <div id="help-personal" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+        <button onclick="toggleHelp('personal')" class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+          <span class="w-8 h-8 rounded-full bg-blue-600 text-white text-base flex items-center justify-center shrink-0">二</span>
+          <div class="flex-1"><div class="text-sm font-semibold text-gray-800">素材积累 &amp; 我的素材库</div><div class="text-xs text-gray-400 mt-0.5">AI 对话引导 · 生成素材卡 · 编辑删除</div></div>
+          <svg id="help-icon-personal" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div id="help-body-personal" class="hidden border-t border-gray-50 px-5 pb-5 text-sm text-gray-600 leading-7">
+          <p class="mt-4 font-semibold text-gray-700">素材积累（AI 对话）</p>
+          <p class="text-xs">首次使用需在「设置」中配置 DeepSeek API Key。</p>
+          <ol class="text-xs space-y-1 mt-2 list-decimal list-inside">
+            <li>点底部「素材」→ 子导航选「素材积累」</li>
+            <li>选择类别：社会成长类 / 社会大爱类 / 亲情类 / 文化传承类</li>
+            <li>AI 老师发出第一个问题，在输入框回答（Enter 发送，Shift+Enter 换行）</li>
+            <li>对话约 3–5 轮，逐步补全：打开记忆 → 细节 → 当时感受 → 现在感悟</li>
+            <li>右侧「素材卡」面板实时更新；完整后「保存到个人素材库」按钮高亮</li>
+            <li>保存后跳转到「我的素材库」查看</li>
+          </ol>
+          <p class="text-xs mt-2">点「换话题」可随时重置对话，开始新一轮积累。</p>
+          <p class="mt-3 font-semibold text-gray-700">我的素材库</p>
+          <ul class="text-xs space-y-1 mt-1">
+            <li>• 点顶部类别标签筛选，「全部」显示全部</li>
+            <li>• 点卡片右上角「编辑」→ 展开表单修改任意字段 → 「保存」</li>
+            <li>• 点「✕」删除单张素材卡</li>
+            <li>• 「清空」删除全部（操作前有确认弹窗）</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ③ 学习 -->
+      <div id="help-learn" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+        <button onclick="toggleHelp('learn')" class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+          <span class="w-8 h-8 rounded-full bg-amber-600 text-white text-base flex items-center justify-center shrink-0">三</span>
+          <div class="flex-1"><div class="text-sm font-semibold text-gray-800">学习</div><div class="text-xs text-gray-400 mt-0.5">描写技法 · 格局提升 · 套题技巧</div></div>
+          <svg id="help-icon-learn" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div id="help-body-learn" class="hidden border-t border-gray-50 px-5 pb-5 text-sm text-gray-600 leading-7">
+          <p class="mt-4 font-semibold text-gray-700">描写技法</p>
+          <p class="text-xs">五大描写技法（点击展开详解）：① 环境描写  ② 肖像描写  ③ 语言描写  ④ 心理描写  ⑤ 动作描写</p>
+          <p class="text-xs mt-1">「选择参考范文」从作文库勾选作品作为技法对照；「查看参考范文」展示已选作文。</p>
+          <p class="mt-3 font-semibold text-gray-700">格局提升</p>
+          <p class="text-xs">格局三角将选材分为三个维度：<span class="font-medium text-gray-700">社会我（格局最高）· 文化我 · 自然我</span>。点「格局导览」查看 12 大格局详解。</p>
+          <p class="mt-3 font-semibold text-gray-700">套题技巧</p>
+          <p class="text-xs">六大点题技巧：点题 3–5 次 · 拆题点题 · 前两段必须点题 · 独立成段 · 末段递进排比 · 标题即线索。</p>
+          <p class="text-xs mt-1">「导入对照范文」分别粘贴库存作文和考场改写版 JSON（字段：title / content），对照学习套题思路。</p>
+        </div>
+      </div>
+
+      <!-- ④ 设置 -->
+      <div id="help-settings" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+        <button onclick="toggleHelp('settings')" class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+          <span class="w-8 h-8 rounded-full bg-gray-500 text-white text-base flex items-center justify-center shrink-0">四</span>
+          <div class="flex-1"><div class="text-sm font-semibold text-gray-800">设置</div><div class="text-xs text-gray-400 mt-0.5">Gitee 跨设备同步 · DeepSeek API Key</div></div>
+          <svg id="help-icon-settings" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div id="help-body-settings" class="hidden border-t border-gray-50 px-5 pb-5 text-sm text-gray-600 leading-7">
+          <p class="mt-4 font-semibold text-gray-700">Gitee 跨设备同步</p>
+          <ol class="text-xs space-y-1 mt-1 list-decimal list-inside">
+            <li>登录 gitee.com，新建一个<span class="font-medium text-gray-700">私有仓库</span>（如 sprint60）</li>
+            <li>进入 Gitee → 头像 → 设置 → 私人令牌，生成令牌（勾选 projects 权限）</li>
+            <li>在「设置」页面填入 Token · 用户名（Owner）· 仓库名 · 文件路径</li>
+            <li>点「保存配置」→「↑ 推送到 Gitee」完成首次备份</li>
+          </ol>
+          <p class="text-xs mt-2 bg-amber-50 rounded-lg px-3 py-2 text-amber-700">⚠ 用户名填写地址栏中 gitee.com/ 后面的英文名（非昵称）</p>
+          <p class="text-xs mt-2">换设备后：填入相同配置 → 「↓ 从 Gitee 拉取」即可同步。</p>
+          <p class="mt-3 font-semibold text-gray-700">DeepSeek API Key</p>
+          <ol class="text-xs space-y-1 mt-1 list-decimal list-inside">
+            <li>访问 platform.deepseek.com，注册账号</li>
+            <li>进入「API Keys」→ 创建新 Key（以 sk- 开头）</li>
+            <li>粘贴到「设置」→「AI 设置」输入框 → 「保存」</li>
+          </ol>
+          <p class="text-xs mt-1">Key 仅存于本地浏览器，不会外传。</p>
+        </div>
+      </div>
+
+      <!-- ⑤ 安装到桌面 -->
+      <div id="help-pwa" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+        <button onclick="toggleHelp('pwa')" class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+          <span class="w-8 h-8 rounded-full bg-violet-600 text-white text-base flex items-center justify-center shrink-0">五</span>
+          <div class="flex-1"><div class="text-sm font-semibold text-gray-800">安装到手机桌面</div><div class="text-xs text-gray-400 mt-0.5">全屏 App 模式 · iPhone &amp; Android</div></div>
+          <svg id="help-icon-pwa" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div id="help-body-pwa" class="hidden border-t border-gray-50 px-5 pb-5 text-sm text-gray-600 leading-7">
+          <p class="mt-4 text-xs"><span class="font-semibold text-gray-700">iPhone（Safari）：</span>点底部分享按钮 → 「添加到主屏幕」</p>
+          <p class="text-xs mt-1"><span class="font-semibold text-gray-700">Android（Chrome）：</span>点右上角菜单 → 「添加到主屏幕」</p>
+          <p class="text-xs mt-2">从桌面图标打开后以全屏模式运行，无浏览器地址栏，体验与原生 App 相同。</p>
+        </div>
+      </div>
+
+      <!-- ⑥ 数据安全 -->
+      <div id="help-data" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+        <button onclick="toggleHelp('data')" class="w-full flex items-center gap-3 p-4 text-left hover:bg-gray-50 transition-colors">
+          <span class="w-8 h-8 rounded-full bg-rose-600 text-white text-base flex items-center justify-center shrink-0">六</span>
+          <div class="flex-1"><div class="text-sm font-semibold text-gray-800">数据安全说明</div><div class="text-xs text-gray-400 mt-0.5">本地存储 · 备份建议</div></div>
+          <svg id="help-icon-data" class="w-4 h-4 text-gray-300 transition-transform duration-200 shrink-0" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div id="help-body-data" class="hidden border-t border-gray-50 px-5 pb-5 text-sm text-gray-600 leading-7">
+          <ul class="text-xs space-y-1.5 mt-4">
+            <li>• 所有数据存储在<span class="font-medium text-gray-700">本地浏览器（localStorage）</span>，不上传任何服务器</li>
+            <li>• 清除浏览器缓存会导致数据丢失，<span class="font-medium text-red-600">请定期推送到 Gitee 备份</span></li>
+            <li>• DeepSeek API Key 和 Gitee Token 同样只存在本地，不外传</li>
+            <li>• 「设置」→「本地数据概览」可查看各模块当前数据量</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="text-center text-xs text-gray-300 py-2">作文冲刺60 · 当前版本 <span id="help-version"></span></div>
+
+    </section>
+
   </main>
+
+  <!-- 底部标签栏 -->
+  <nav id="bottom-tabs" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-20 flex max-w-full">
+  </nav>
 
   <!-- 成功提示 Toast -->
   <div id="toast"
@@ -670,8 +867,10 @@
     // ——— 数据层 ———
     // 存储结构：{ version, updatedAt, items: [...] }
     // 设计为单一 JSON 对象，方便未来整体同步到 Gitee 的一个文件
+    const APP_VERSION = 'v1.4';
     const STORAGE_KEY = 'sprint60_v2';
     const API_KEY_STORAGE = 'sprint60_deepseek_key';
+    document.getElementById('app-version-badge').textContent = APP_VERSION;
 
     function loadStore() {
       try {
@@ -708,82 +907,150 @@
     // conflictChoices: { [id]: 'overwrite' | 'skip' }
     let conflictChoices = {};
 
-    // ——— 导航配置 ———
-    // 第一行：主模块
-    const SECTIONS = {
-      essays:    { label: '优秀作文', tabs: [{id:'essays-import',label:'导入'},{id:'essays-bank',label:'显示'}] },
-      technique: { label: '描写技法', tabs: [{id:'technique-home',label:'主页'},{id:'technique-import',label:'导入'},{id:'technique-bank',label:'显示'}] },
-      pattern:   { label: '格局提升', tabs: [{id:'pattern-home',label:'主页'},{id:'pattern-guide',label:'导览'}] },
-      cloze:     { label: '套题技巧', tabs: [{id:'cloze-home',label:'主页'},{id:'cloze-import',label:'导入'},{id:'cloze-bank',label:'显示'}] },
-      settings:  { label: '设置',     tabs: [] }
+    // ——— 导航配置（底部标签栏） ———
+    const TABS = {
+      essays:   { label: '作文库', defaultId: 'essays-bank',          color: '#059669', subnav: null },
+      personal: { label: '素材',   defaultId: 'personal-accumulate',  color: '#2563eb',
+                  subnav: [{id:'personal-accumulate',label:'素材积累'},{id:'personal-bank',label:'我的素材库'}] },
+      learn:    { label: '学习',   defaultId: 'technique-home',       color: '#d97706',
+                  subnav: [{id:'technique-home',label:'描写技法'},{id:'pattern-home',label:'格局提升'},{id:'cloze-home',label:'套题技巧'}] },
+      plan:     { label: '计划',   defaultId: 'plan-home',            color: '#7c3aed', subnav: null },
+      settings: { label: '设置',   defaultId: 'settings-home',        color: '#6b7280', subnav: null },
+      help:     { label: '帮助',   defaultId: 'help-home',            color: '#0891b2', subnav: null }
     };
-    // 第二行左侧固定：次要模块
-    const SECONDARY = {
-      personal: { label: '个人素材库', tabs: [{id:'personal-accumulate',label:'素材积累'},{id:'personal-bank',label:'显示'}] },
-      plan:     { label: '21天计划',   tabs: [] }
+
+    // contentId → tabKey
+    const CONTENT_TAB = {
+      'essays-import':'essays','essays-bank':'essays',
+      'personal-accumulate':'personal','personal-bank':'personal',
+      'technique-home':'learn','technique-import':'learn','technique-bank':'learn',
+      'pattern-home':'learn','pattern-guide':'learn',
+      'cloze-home':'learn','cloze-import':'learn','cloze-bank':'learn',
+      'plan-home':'plan','settings-home':'settings','help-home':'help'
+    };
+
+    const PAGE_TITLES = {
+      'essays-import':'导入作文','essays-bank':'作文库',
+      'personal-accumulate':'素材积累','personal-bank':'我的素材库',
+      'technique-home':'描写技法','technique-import':'描写技法','technique-bank':'描写技法',
+      'pattern-home':'格局提升','pattern-guide':'格局导览',
+      'cloze-home':'套题技巧','cloze-import':'套题技巧','cloze-bank':'套题技巧',
+      'plan-home':'21天计划','settings-home':'设置','help-home':'使用手册'
+    };
+
+    // 底部 tab 图标（SVG path 内容）
+    const TAB_ICONS = {
+      essays:   `<path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 004 22H20V2H6.5A2.5 2.5 0 004 4.5v15z" stroke-linecap="round" stroke-linejoin="round"/>`,
+      personal: `<path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke-linecap="round" stroke-linejoin="round"/>`,
+      learn:    `<path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" stroke-linecap="round" stroke-linejoin="round"/>`,
+      plan:     `<rect x="3" y="4" width="18" height="18" rx="2" stroke-linecap="round"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>`,
+      settings: `<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>`,
+      help:     `<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>`
     };
 
     const ALL_CONTENT_IDS = ['essays-import','essays-bank','personal-accumulate','personal-bank',
       'technique-home','technique-import','technique-bank','pattern-home','pattern-guide',
-      'cloze-home','cloze-import','cloze-bank','plan-home','settings-home'];
+      'cloze-home','cloze-import','cloze-bank','plan-home','settings-home','help-home'];
 
-    let activeSection = 'essays';
-    let activeContentId = 'essays-import';
+    let activeTab = 'essays';
+    let activeContentId = 'essays-bank';
 
+    function showTab(tabKey) {
+      activeTab = tabKey;
+      showContent(TABS[tabKey].defaultId);
+    }
+
+    // shim for legacy calls (e.g. showEssayByTitle sets activeSection)
     function showSection(name) {
-      activeSection = name;
-      const sec = SECTIONS[name] || SECONDARY[name];
-      showContent(sec.tabs.length ? sec.tabs[0].id : name + '-home');
+      const map = {essays:'essays',personal:'personal',technique:'learn',pattern:'learn',cloze:'learn',plan:'plan',settings:'settings',help:'help'};
+      showTab(map[name] || name);
     }
 
     function showContent(contentId) {
+      activeTab = CONTENT_TAB[contentId] || activeTab;
       activeContentId = contentId;
       ALL_CONTENT_IDS.forEach(id => {
         document.getElementById('content-' + id).classList.toggle('hidden', id !== contentId);
       });
-      renderTopNav();
-      renderRow2();
-      if (contentId === 'essays-bank') renderBank();
-      if (contentId === 'personal-bank') renderPersonalBank();
-      if (contentId === 'personal-accumulate') initAccumTab();
-      if (contentId === 'technique-import') renderTechniqueImport();
-      if (contentId === 'technique-bank') renderTechniqueBank();
-      if (contentId === 'pattern-guide') renderPatternGuide();
-      if (contentId === 'cloze-bank') renderClozeBank();
-      if (contentId === 'settings-home') renderSettings();
+      renderBottomTabs();
+      renderSubNav();
+      renderPageTitle();
+      if (contentId === 'essays-bank')          renderBank();
+      if (contentId === 'personal-bank')         renderPersonalBank();
+      if (contentId === 'personal-accumulate')   initAccumTab();
+      if (contentId === 'technique-import')      renderTechniqueImport();
+      if (contentId === 'technique-bank')        renderTechniqueBank();
+      if (contentId === 'pattern-guide')         renderPatternGuide();
+      if (contentId === 'cloze-bank')            renderClozeBank();
+      if (contentId === 'plan-home')             renderPlanHome();
+      if (contentId === 'settings-home')         renderSettings();
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
-    function renderTopNav() {
-      document.getElementById('top-nav').innerHTML = Object.entries(SECTIONS).map(([key, sec]) =>
-        `<button onclick="showSection('${key}')" class="px-3 py-1.5 rounded-full font-medium whitespace-nowrap transition-colors text-sm ${activeSection === key ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-100'}">${sec.label}</button>`
-      ).join('');
+    function renderBottomTabs() {
+      const nav = document.getElementById('bottom-tabs');
+      nav.innerHTML = Object.entries(TABS).map(([key, tab]) => {
+        const isActive = activeTab === key;
+        const color = isActive ? tab.color : '#9ca3af';
+        return `<button onclick="showTab('${key}')"
+          class="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors"
+          style="color:${color}">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="${isActive ? 2 : 1.6}" stroke-linecap="round" stroke-linejoin="round">
+            ${TAB_ICONS[key]}
+          </svg>
+          <span class="text-[10px] font-medium">${tab.label}</span>
+        </button>`;
+      }).join('');
     }
 
-    function renderRow2() {
-      // 左侧固定按钮
-      ['personal','plan'].forEach(key => {
-        const btn = document.getElementById('nav-' + key);
-        const isActive = activeSection === key;
-        btn.className = `px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${isActive ? 'bg-gray-800 text-white' : 'text-gray-500 hover:bg-gray-100'}`;
-      });
-      // 右侧子标签
-      const sec = SECTIONS[activeSection] || SECONDARY[activeSection];
-      const sep = document.getElementById('sub-nav-sep');
-      const subNav = document.getElementById('sub-nav');
-      if (sec && sec.tabs.length) {
-        sep.classList.remove('hidden');
-        subNav.innerHTML = sec.tabs.map(tab =>
-          `<button onclick="showContent('${tab.id}')" class="px-3 py-1 rounded-full text-xs font-medium transition-colors ${activeContentId === tab.id ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-100'}">${tab.label}</button>`
-        ).join('');
-      } else {
-        sep.classList.add('hidden');
-        subNav.innerHTML = '';
+    function renderSubNav() {
+      const tab = TABS[activeTab];
+      const el = document.getElementById('sub-nav');
+      const inner = document.getElementById('sub-nav-inner');
+      if (!tab || !tab.subnav) { el.classList.add('hidden'); return; }
+      el.classList.remove('hidden');
+      const color = tab.color;
+      inner.innerHTML = tab.subnav.map(item => {
+        const isActive = activeContentId === item.id;
+        return `<button onclick="showContent('${item.id}')"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${isActive ? 'seg-active' : 'text-gray-500 hover:text-gray-700'}"
+          style="${isActive ? `color:${color}` : ''}">
+          ${item.label}
+        </button>`;
+      }).join('');
+    }
+
+    // 子页面 → 返回目标
+    const BACK_TARGET = {
+      'technique-bank':  'technique-home',
+      'technique-import':'technique-home',
+      'pattern-guide':   'pattern-home',
+      'cloze-bank':      'cloze-home',
+      'cloze-import':    'cloze-home',
+      'essays-import':   'essays-bank',
+    };
+
+    function renderPageTitle() {
+      const titleEl  = document.getElementById('page-title');
+      const actionEl = document.getElementById('header-action');
+      if (titleEl) titleEl.textContent = PAGE_TITLES[activeContentId] || '';
+      if (actionEl) {
+        const backId = BACK_TARGET[activeContentId];
+        actionEl.innerHTML = backId
+          ? `<button onclick="showContent('${backId}')"
+               class="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors">
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                 <path d="M15 18l-6-6 6-6"/>
+               </svg>返回</button>`
+          : '';
       }
     }
 
     // ——— 设置 & Gitee 同步 ———
     const SETTINGS_KEY = 'sprint60_settings';
-    const SYNC_STORE_KEYS = ['sprint60_v2','sprint60_personal_v1','sprint60_cloze_v1','sprint60_technique_ids'];
+    const SYNC_STORE_KEYS = ['sprint60_v2','sprint60_personal_v1','sprint60_cloze_v1','sprint60_technique_ids','sprint60_plan_v1'];
     const GITEE_API = 'https://gitee.com/api/v5';
 
     function loadSettings() {
@@ -1656,17 +1923,50 @@
     function personalCard(item) {
       const details = item.core_details?.length ? escHtml(item.core_details.join('；')) : '';
       const topics = item.applicable_topics || [];
+      const CATS = ['社会成长类','社会大爱类','亲情类','文化传承类'];
+      const catOpts = CATS.map(c => `<option value="${c}" ${c===item.category?'selected':''}>${c}</option>`).join('');
       return `
-        <div class="bg-white border border-gray-100 rounded-xl p-4 card-enter">
+        <div class="bg-white border border-gray-100 rounded-xl p-4 card-enter" id="pcard-${item.id}">
           <div class="flex items-start gap-2 mb-2">
             <span class="text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full shrink-0">${escHtml(item.category)}</span>
             <span class="text-sm font-semibold text-gray-800 flex-1">${escHtml(item.event_name)}</span>
+            <button onclick="editPersonalItem('${item.id}')" class="text-xs text-blue-400 hover:text-blue-600 shrink-0">编辑</button>
             <button onclick="deletePersonalItem('${item.id}')" class="text-gray-300 hover:text-red-400 text-xs shrink-0 ml-1">✕</button>
           </div>
           ${details ? `<div class="text-xs text-gray-500 leading-5 mb-1"><span class="font-medium text-gray-600">细节：</span>${details}</div>` : ''}
           ${item.past_feeling ? `<div class="text-xs text-gray-500 leading-5 mb-1"><span class="font-medium text-gray-600">感受：</span>${escHtml(item.past_feeling)}</div>` : ''}
           ${item.present_reflection ? `<div class="text-xs text-gray-500 leading-5 mb-2"><span class="font-medium text-gray-600">感悟：</span>${escHtml(item.present_reflection)}</div>` : ''}
           ${topics.length ? `<div class="flex flex-wrap gap-1">${topics.map(t => `<span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">${escHtml(t)}</span>`).join('')}</div>` : ''}
+          <div id="edit-personal-${item.id}" class="hidden mt-3 border-t border-gray-100 pt-3 space-y-2">
+            <div>
+              <label class="text-xs text-gray-500">类别</label>
+              <select id="edit-cat-${item.id}" class="w-full text-sm border border-gray-200 rounded-lg px-2 py-1 mt-0.5">${catOpts}</select>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500">事件名称</label>
+              <input id="edit-name-${item.id}" type="text" value="${escHtml(item.event_name)}" class="w-full text-sm border border-gray-200 rounded-lg px-2 py-1 mt-0.5" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-500">核心细节（用；分隔）</label>
+              <textarea id="edit-details-${item.id}" rows="2" class="w-full text-sm border border-gray-200 rounded-lg px-2 py-1 mt-0.5 resize-none">${escHtml((item.core_details||[]).join('；'))}</textarea>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500">当时感受</label>
+              <textarea id="edit-feeling-${item.id}" rows="2" class="w-full text-sm border border-gray-200 rounded-lg px-2 py-1 mt-0.5 resize-none">${escHtml(item.past_feeling||'')}</textarea>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500">现在感悟</label>
+              <textarea id="edit-reflection-${item.id}" rows="2" class="w-full text-sm border border-gray-200 rounded-lg px-2 py-1 mt-0.5 resize-none">${escHtml(item.present_reflection||'')}</textarea>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500">适用主题（用；分隔）</label>
+              <input id="edit-topics-${item.id}" type="text" value="${escHtml((item.applicable_topics||[]).join('；'))}" class="w-full text-sm border border-gray-200 rounded-lg px-2 py-1 mt-0.5" />
+            </div>
+            <div class="flex gap-2 pt-1">
+              <button onclick="savePersonalEdit('${item.id}')" class="flex-1 bg-blue-500 text-white text-sm rounded-lg py-1.5 font-medium">保存</button>
+              <button onclick="cancelPersonalEdit('${item.id}')" class="flex-1 bg-gray-100 text-gray-600 text-sm rounded-lg py-1.5">取消</button>
+            </div>
+          </div>
         </div>`;
     }
 
@@ -1681,6 +1981,33 @@
       renderPersonalBank();
     }
 
+    function editPersonalItem(id) {
+      const panel = document.getElementById('edit-personal-' + id);
+      if (panel) panel.classList.toggle('hidden');
+    }
+
+    function cancelPersonalEdit(id) {
+      const panel = document.getElementById('edit-personal-' + id);
+      if (panel) panel.classList.add('hidden');
+    }
+
+    function savePersonalEdit(id) {
+      const bank = loadPersonalBank();
+      const idx = bank.findIndex(e => e.id === id);
+      if (idx === -1) return;
+      const item = bank[idx];
+      item.category = document.getElementById('edit-cat-' + id).value;
+      item.event_name = document.getElementById('edit-name-' + id).value.trim();
+      item.core_details = document.getElementById('edit-details-' + id).value.split('；').map(s => s.trim()).filter(Boolean);
+      item.past_feeling = document.getElementById('edit-feeling-' + id).value.trim();
+      item.present_reflection = document.getElementById('edit-reflection-' + id).value.trim();
+      item.applicable_topics = document.getElementById('edit-topics-' + id).value.split('；').map(s => s.trim()).filter(Boolean);
+      bank[idx] = item;
+      savePersonalBank(bank);
+      renderPersonalBank();
+      showToast('素材卡已更新');
+    }
+
     function clearPersonalBank() {
       if (!confirm('确定清空所有个人素材卡？此操作不可撤销。')) return;
       savePersonalBank([]);
@@ -1692,8 +2019,226 @@
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
     });
 
+    // ——— 模块：21天计划 ———
+    const PLAN_KEY   = 'sprint60_plan_v1';
+    const PLAN_START = new Date('2026-05-29T00:00:00');
+    const EXAM_DATE  = new Date('2026-06-20T00:00:00');
+
+    const PLAN_TASKS = [
+      { day:1,  tag:'素材积累', color:'#2563eb', tasks:['阅读一篇优秀素材作文','完成一次 AI 素材积累对话'], link:'essays-bank' },
+      { day:2,  tag:'素材积累', color:'#2563eb', tasks:['阅读一篇优秀素材作文','完成一次 AI 素材积累对话'], link:'essays-bank' },
+      { day:3,  tag:'素材积累', color:'#2563eb', tasks:['阅读一篇优秀素材作文','完成一次 AI 素材积累对话'], link:'essays-bank' },
+      { day:4,  tag:'素材积累', color:'#2563eb', tasks:['阅读一篇优秀素材作文','完成一次 AI 素材积累对话'], link:'essays-bank' },
+      { day:5,  tag:'素材积累', color:'#2563eb', tasks:['阅读一篇优秀素材作文','完成一次 AI 素材积累对话'], link:'essays-bank' },
+      { day:6,  tag:'描写技法', color:'#d97706', tasks:['学习五大描写技法','在参考范文中识别并标注各种技法'], link:'technique-home' },
+      { day:7,  tag:'描写技法', color:'#d97706', tasks:['复习五大描写技法','结合参考范文加深理解'], link:'technique-home' },
+      { day:8,  tag:'格局提升', color:'#16a34a', tasks:['学习格局三角与三大维度','浏览 12 大格局详解'], link:'pattern-home' },
+      { day:9,  tag:'格局提升', color:'#16a34a', tasks:['复习格局提升','思考自己的素材属于哪种格局'], link:'pattern-home' },
+      { day:10, tag:'套题技巧', color:'#ea580c', tasks:['学习六大点题技巧','阅读一组对照范文'], link:'cloze-home' },
+      { day:11, tag:'套题技巧', color:'#ea580c', tasks:['复习套题技巧','尝试用自己的素材进行点题练习'], link:'cloze-home' },
+      { day:12, tag:'写作练习', color:'#7c3aed', tasks:['查看亲情类素材卡','完成一篇亲情类作文（600字以上）'], link:'personal-bank' },
+      { day:13, tag:'写作练习', color:'#7c3aed', tasks:['查看社会成长类素材卡','完成一篇社会成长类作文'], link:'personal-bank' },
+      { day:14, tag:'写作练习', color:'#7c3aed', tasks:['查看社会大爱类素材卡','完成一篇社会大爱类作文'], link:'personal-bank' },
+      { day:15, tag:'写作练习', color:'#7c3aed', tasks:['查看文化传承类素材卡','完成一篇文化传承类作文'], link:'personal-bank' },
+      { day:16, tag:'套题实战', color:'#dc2626', tasks:['找一道一模作文题','将库存素材作文套题改写'], link:'cloze-import' },
+      { day:17, tag:'套题实战', color:'#dc2626', tasks:['找一道一模作文题','将库存素材作文套题改写'], link:'cloze-import' },
+      { day:18, tag:'套题实战', color:'#dc2626', tasks:['找一道一模作文题','将库存素材作文套题改写'], link:'cloze-import' },
+      { day:19, tag:'套题实战', color:'#dc2626', tasks:['找一道一模作文题','将库存素材作文套题改写'], link:'cloze-import' },
+      { day:20, tag:'背诵冲刺', color:'#db2777', tasks:['背诵一篇优秀作文','重点记忆开头、结尾与点题句'], link:'essays-bank' },
+      { day:21, tag:'背诵冲刺', color:'#db2777', tasks:['背诵一篇优秀作文','重点记忆开头、结尾与点题句'], link:'essays-bank' },
+    ];
+
+    function loadPlanStore() {
+      try { const r = localStorage.getItem(PLAN_KEY); if (r) return JSON.parse(r); } catch {}
+      return { version: 1, updatedAt: null, checked: {} };
+    }
+    function savePlanStore(s) { s.updatedAt = new Date().toISOString(); localStorage.setItem(PLAN_KEY, JSON.stringify(s)); }
+    function getPlanChecked() { return loadPlanStore().checked || {}; }
+
+    let planExpandedDays = new Set();
+
+    function togglePlanTask(day, taskIdx) {
+      const s = loadPlanStore();
+      if (!s.checked) s.checked = {};
+      const key = String(day);
+      const arr = s.checked[key] ? [...s.checked[key]] : [];
+      const pos = arr.indexOf(taskIdx);
+      if (pos === -1) arr.push(taskIdx); else arr.splice(pos, 1);
+      s.checked[key] = arr;
+      savePlanStore(s);
+      renderPlanHome();
+    }
+
+    function togglePlanExpand(day) {
+      if (planExpandedDays.has(day)) planExpandedDays.delete(day);
+      else planExpandedDays.add(day);
+      renderPlanHome();
+    }
+
+    function renderPlanHome() {
+      const el = document.getElementById('plan-inner');
+      if (!el) return;
+
+      const today = new Date(); today.setHours(0,0,0,0);
+      const start = new Date(PLAN_START); start.setHours(0,0,0,0);
+      const exam  = new Date(EXAM_DATE);  exam.setHours(0,0,0,0);
+
+      const dayNum     = Math.floor((today - start) / 86400000) + 1;
+      const daysToExam = Math.ceil((exam - today) / 86400000);
+      const checked    = getPlanChecked();
+
+      const completedDays = PLAN_TASKS.filter(pt => {
+        const c = checked[String(pt.day)] || [];
+        return c.length >= pt.tasks.length;
+      }).length;
+      const progress = Math.round(completedDays / 21 * 100);
+      const examColor = daysToExam <= 3 ? '#dc2626' : daysToExam <= 7 ? '#d97706' : '#7c3aed';
+
+      let h = '';
+
+      // ── 顶部概览 ──
+      h += `<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-base font-bold text-gray-800">21天冲刺计划</div>
+            <div class="text-xs text-gray-400 mt-0.5">5月29日 – 6月18日 · 中考 6月20日</div>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl font-bold leading-none" style="color:${examColor}">${Math.max(daysToExam,0)}</div>
+            <div class="text-xs text-gray-400 mt-0.5">天后中考</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 mb-1.5">
+          <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-2 rounded-full transition-all duration-500" style="width:${progress}%;background:#7c3aed"></div>
+          </div>
+          <span class="text-xs font-semibold text-violet-600 shrink-0">${completedDays}/21天</span>
+        </div>
+        <div class="text-xs text-gray-400">${completedDays===21?'🎉 所有任务已完成！加油备考！':completedDays===0?'从今天开始，坚持打卡 💪':`已完成 ${completedDays} 天，继续加油！`}</div>
+      </div>`;
+
+      // ── 计划未开始提示 ──
+      if (dayNum < 1) {
+        h += `<div class="bg-violet-50 border border-violet-100 rounded-2xl p-4 mb-4 text-center">
+          <div class="text-3xl mb-2">📅</div>
+          <div class="text-sm font-semibold text-violet-700">计划明天开始，做好准备！</div>
+          <div class="text-xs text-violet-500 mt-1">2026年5月29日 Day 1 · 坚持21天 · 赢得中考</div>
+        </div>`;
+      } else if (dayNum > 21) {
+        h += `<div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 mb-4 text-center">
+          <div class="text-3xl mb-2">🏆</div>
+          <div class="text-sm font-semibold text-emerald-700">21天计划已完成，冲刺中考！</div>
+        </div>`;
+      }
+
+      // ── 任务列表 ──
+      h += `<div class="space-y-2 pb-4">`;
+
+      for (const pt of PLAN_TASKS) {
+        const c       = checked[String(pt.day)] || [];
+        const isDone  = c.length >= pt.tasks.length;
+        const isToday = pt.day === dayNum;
+        const isPast  = pt.day < dayNum;
+        const isExp   = planExpandedDays.has(pt.day);
+
+        const d = new Date(PLAN_START);
+        d.setDate(d.getDate() + pt.day - 1);
+        const dateStr = `${d.getMonth()+1}月${d.getDate()}日`;
+
+        if (isToday) {
+          // ── 今天：大卡片展开 ──
+          h += `<div class="bg-white rounded-2xl border-2 shadow-sm overflow-hidden" style="border-color:#7c3aed">
+            <div class="px-4 py-2.5 flex items-center justify-between" style="background:#7c3aed">
+              <div class="flex items-center gap-2">
+                <span class="text-white font-bold text-sm">Day ${pt.day}</span>
+                <span class="text-violet-200 text-xs">${dateStr} · 今天</span>
+              </div>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-white font-semibold" style="color:${pt.color}">${pt.tag}</span>
+            </div>
+            <div class="p-4 space-y-3">`;
+          pt.tasks.forEach((task, idx) => {
+            const done = c.includes(idx);
+            h += `<label class="flex items-start gap-3 cursor-pointer select-none">
+              <input type="checkbox" ${done?'checked':''} onchange="togglePlanTask(${pt.day},${idx})"
+                class="w-5 h-5 mt-0.5 rounded cursor-pointer shrink-0 accent-violet-600">
+              <span class="text-sm leading-6 ${done?'line-through text-gray-300':'text-gray-700'}">${task}</span>
+            </label>`;
+          });
+          if (pt.link) {
+            h += `<button onclick="showContent('${pt.link}')" class="w-full text-xs text-violet-600 border border-violet-200 rounded-xl py-1.5 hover:bg-violet-50 transition-colors mt-1">前往相关页面 →</button>`;
+          }
+          if (isDone) {
+            h += `<div class="text-center text-xs text-emerald-600 font-semibold bg-emerald-50 rounded-xl py-2 mt-1">✓ 今日任务已完成，继续保持！</div>`;
+          }
+          h += `</div></div>`;
+
+        } else if (isPast) {
+          // ── 过去的天：可展开 ──
+          const partial = c.length > 0 && !isDone;
+          const statusIcon  = isDone ? '✓' : partial ? '◑' : '○';
+          const statusColor = isDone ? '#059669' : partial ? '#d97706' : '#d1d5db';
+
+          h += `<div>
+            <div class="bg-white rounded-xl border border-gray-100 px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors" onclick="togglePlanExpand(${pt.day})">
+              <span class="text-sm font-bold w-5 text-center shrink-0" style="color:${statusColor}">${statusIcon}</span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-xs font-medium text-gray-500">Day ${pt.day}</span>
+                  <span class="text-xs text-gray-300">${dateStr}</span>
+                  <span class="text-xs px-1.5 py-0.5 rounded-full font-medium" style="background:${pt.color}18;color:${pt.color}">${pt.tag}</span>
+                </div>
+                <div class="text-xs text-gray-400 mt-0.5">${isDone?'已完成 ✓':partial?`${c.length}/${pt.tasks.length} 项已完成`:'未打卡'}</div>
+              </div>
+              <svg class="w-4 h-4 text-gray-300 shrink-0 transition-transform duration-200" style="transform:${isExp?'rotate(180deg)':''}" viewBox="0 0 16 16" fill="none">
+                <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            ${isExp ? `<div class="bg-gray-50 rounded-xl px-4 py-3 mt-1 border border-gray-100 space-y-2.5">
+              ${pt.tasks.map((task,idx) => {
+                const done = c.includes(idx);
+                return `<label class="flex items-start gap-3 cursor-pointer select-none">
+                  <input type="checkbox" ${done?'checked':''} onchange="togglePlanTask(${pt.day},${idx})"
+                    class="w-4 h-4 mt-0.5 rounded cursor-pointer shrink-0 accent-violet-600">
+                  <span class="text-xs leading-5 ${done?'line-through text-gray-300':'text-gray-600'}">${task}</span>
+                </label>`;
+              }).join('')}
+            </div>` : ''}
+          </div>`;
+
+        } else {
+          // ── 未来的天：预览锁定 ──
+          h += `<div class="bg-white rounded-xl border border-gray-100 px-4 py-3 flex items-center gap-3 opacity-40">
+            <span class="text-sm text-gray-300 w-5 text-center shrink-0">·</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-xs font-medium text-gray-400">Day ${pt.day}</span>
+                <span class="text-xs text-gray-300">${dateStr}</span>
+                <span class="text-xs px-1.5 py-0.5 rounded-full font-medium" style="background:${pt.color}18;color:${pt.color}">${pt.tag}</span>
+              </div>
+              <div class="text-xs text-gray-300 mt-0.5 truncate">${pt.tasks.join(' · ')}</div>
+            </div>
+            <span class="text-gray-300 text-xs shrink-0">🔒</span>
+          </div>`;
+        }
+      }
+
+      h += `</div>`;
+      el.innerHTML = h;
+    }
+
+    // ——— 帮助手册折叠 ———
+    function toggleHelp(key) {
+      const body = document.getElementById('help-body-' + key);
+      const icon = document.getElementById('help-icon-' + key);
+      if (!body) return;
+      const open = !body.classList.contains('hidden');
+      body.classList.toggle('hidden', open);
+      if (icon) icon.style.transform = open ? '' : 'rotate(180deg)';
+    }
+
     // ——— 初始化导航 ———
-    showSection('essays');
+    showTab('essays');
+    document.getElementById('help-version').textContent = APP_VERSION;
 
     // ——— 模块5：套题技巧 ———
     const CLOZE_KEY = 'sprint60_cloze_v1';
@@ -1922,7 +2467,7 @@
       const item = bank.find(e => e.title === title);
       if (!item) { showToast(`未找到《${title}》，请先导入该作文`); return; }
       activeType = 'all';
-      activeSection = 'essays';
+      activeTab = 'essays';
       showContent('essays-bank');
       setTimeout(() => {
         const card = document.getElementById(`card-${item.id}`);
